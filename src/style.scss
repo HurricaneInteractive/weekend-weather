@@ -1,0 +1,29 @@
+$purple: #7161EF;
+$orange: #FF6C5F;
+$green: #2DDE98;
+$blue: #2292FF;
+$grey: #8DA9C4;
+$black: #02020B;
+$border: rgba($grey, 0.4);
+
+$w-bold: 700;
+$w-black: 900;
+
+body {
+    font-family: 'Muli', sans-serif;
+    font-size: 16px;
+    font-weight: $w-bold;
+    color: $black;
+    margin: 0;
+    padding: 0;
+}
+
+#mood-bar {
+    background: $blue;
+    background: -moz-linear-gradient(left, rgba($blue,1) 0%, rgba($purple,1) 100%);
+    background: -webkit-linear-gradient(left, rgba($blue,1) 0%,rgba($purple,1) 100%);
+    background: linear-gradient(to right, rgba($blue,1) 0%,rgba($purple,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#2292ff', endColorstr='#7161ef',GradientType=1 );
+    transition: background 300ms ease-in-out;
+    height: 10px;
+}
