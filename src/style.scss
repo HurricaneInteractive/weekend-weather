@@ -1,29 +1,162 @@
-$purple: #7161EF;
-$orange: #FF6C5F;
-$green: #2DDE98;
-$blue: #2292FF;
-$grey: #8DA9C4;
-$black: #02020B;
-$border: rgba($grey, 0.4);
+$colours: (
+    'purple': #7161EF,
+    'orange': #FF6C5F,
+    'green': #2DDE98,
+    'blue': #2292FF,
+    'grey': #8da9c4,
+    'black': #02020B,
+    'border': rgba(141, 169, 196, 0.4)
+);
 
 $w-bold: 700;
 $w-black: 900;
+
+$grid: 1020px;
+
+$base-font-size: 16px;
+$label: 12px;
+$heading: 30px;
+
+// Calc based on the current context of element. First arg is PX value you want to set
+// on the element, second arg is the PX value of the element font size.
+@function calc-em($target-px, $context) {
+    @return ($target-px / $context) * 1em;
+}
+// Simple conversion in global base font scope. Using base font size as default context.
+@function em($pixels, $context: $base-font-size) {
+    @return ($pixels / $context) * 1em;
+}
+
+@function get-colour($color) {
+    @return map-get($colours, $color);
+}
+
+@mixin cf() {
+    &:after {
+        content: '';
+        clear: both;
+        display: table;
+    }
+}
+.clearfix {
+    @include cf();
+}
 
 body {
     font-family: 'Muli', sans-serif;
     font-size: 16px;
     font-weight: $w-bold;
-    color: $black;
+    color: get-colour('black');
     margin: 0;
-    padding: 0;
+    padding: 10px 0 0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+header {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid get-colour('border');
+}
+
+h1, h2, h3 {
+    font-size: em($heading);
+    font-weight: $w-black;
+    margin: 0;
+    line-height: 1;
+}
+
+p, li {
+    font-size: em(14px);
+    margin: 0;
+}
+
+label,
+.label {
+    font-size: calc-em($label, $base-font-size);
+    margin: 0;
+    display: block;
+    text-transform: uppercase;
+    color: rgba(get-colour('grey'), 0.4);
+}
+
+@each $name, $color in $colours {
+    .c-#{$name} {
+        color: $color;
+    }
+}
+
+.m-0 {
+    margin: 0;
+}
+
+.fs-heading {
+    font-size: calc-em($heading, $base-font-size);
+}
+
+.fw-bold {
+    font-weight: $w-bold;
+}
+.fw-black {
+    font-weight: $w-black;
+}
+.tt-upper {
+    text-transform: uppercase;
+}
+
+.container {
+    margin-right: auto;
+    margin-left: auto;
+    max-width: $grid;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.feather {
+    width: 24px;
+    height: 24px;
+    stroke: get-colour('purple');
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
 }
 
 #mood-bar {
-    background: $blue;
-    background: -moz-linear-gradient(left, rgba($blue,1) 0%, rgba($purple,1) 100%);
-    background: -webkit-linear-gradient(left, rgba($blue,1) 0%,rgba($purple,1) 100%);
-    background: linear-gradient(to right, rgba($blue,1) 0%,rgba($purple,1) 100%);
+    background: get-colour('blue');
+    background: -moz-linear-gradient(left, rgba(get-colour('blue'),1) 0%, rgba(get-colour('purple'),1) 100%);
+    background: -webkit-linear-gradient(left, rgba(get-colour('blue'),1) 0%,rgba(get-colour('purple'),1) 100%);
+    background: linear-gradient(to right, rgba(get-colour('blue'),1) 0%,rgba(get-colour('purple'),1) 100%);
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#2292ff', endColorstr='#7161ef',GradientType=1 );
     transition: background 300ms ease-in-out;
     height: 10px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+.appbar {
+    > .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        .details {
+            flex-grow: 2;
+            display: flex;
+            align-items: center;
+            .feather {
+                margin-right: 15px;
+            }
+            .city {
+                letter-spacing: 0.4px;
+            }
+        }
+    }
+}
+
+#app {
+    padding: 30px 0;
 }
