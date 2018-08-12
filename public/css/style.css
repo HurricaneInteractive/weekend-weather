@@ -1,3 +1,53 @@
-body { font-family: 'Muli', sans-serif; font-size: 16px; font-weight: 700; color: #02020B; margin: 0; padding: 0; }
+.clearfix:after { content: ''; clear: both; display: table; }
 
-#mood-bar { background: #2292FF; background: -moz-linear-gradient(left, #2292ff 0%, #7161ef 100%); background: -webkit-linear-gradient(left, #2292ff 0%, #7161ef 100%); background: linear-gradient(to right, #2292ff 0%, #7161ef 100%); filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#2292ff', endColorstr='#7161ef',GradientType=1 ); transition: background 300ms ease-in-out; height: 10px; }
+body { font-family: 'Muli', sans-serif; font-size: 16px; font-weight: 700; color: #02020B; margin: 0; padding: 10px 0 0; }
+
+* { box-sizing: border-box; }
+
+header { padding-top: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(141, 169, 196, 0.4); }
+
+h1, h2, h3 { font-size: 1.875em; font-weight: 900; margin: 0; line-height: 1; }
+
+p, li { font-size: 0.875em; margin: 0; }
+
+label, .label { font-size: 0.75em; margin: 0; display: block; text-transform: uppercase; color: rgba(141, 169, 196, 0.4); }
+
+.c-purple { color: #7161EF; }
+
+.c-orange { color: #FF6C5F; }
+
+.c-green { color: #2DDE98; }
+
+.c-blue { color: #2292FF; }
+
+.c-grey { color: #8da9c4; }
+
+.c-black { color: #02020B; }
+
+.c-border { color: rgba(141, 169, 196, 0.4); }
+
+.m-0 { margin: 0; }
+
+.fs-heading { font-size: 1.875em; }
+
+.fw-bold { font-weight: 700; }
+
+.fw-black { font-weight: 900; }
+
+.tt-upper { text-transform: uppercase; }
+
+.container { margin-right: auto; margin-left: auto; max-width: 1020px; padding-left: 20px; padding-right: 20px; }
+
+.feather { width: 24px; height: 24px; stroke: #7161EF; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+
+#mood-bar { background: #2292FF; background: -moz-linear-gradient(left, #2292ff 0%, #7161ef 100%); background: -webkit-linear-gradient(left, #2292ff 0%, #7161ef 100%); background: linear-gradient(to right, #2292ff 0%, #7161ef 100%); filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#2292ff', endColorstr='#7161ef',GradientType=1 ); transition: background 300ms ease-in-out; height: 10px; position: fixed; top: 0; left: 0; width: 100%; }
+
+.appbar > .container { display: flex; justify-content: space-between; align-items: center; }
+
+.appbar > .container .details { flex-grow: 2; display: flex; align-items: center; }
+
+.appbar > .container .details .feather { margin-right: 15px; }
+
+.appbar > .container .details .city { letter-spacing: 0.4px; }
+
+#app { padding: 30px 0; }
