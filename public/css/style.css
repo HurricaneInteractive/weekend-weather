@@ -1,0 +1,3 @@
+body { font-family: 'Muli', sans-serif; font-size: 16px; font-weight: 700; color: #02020B; margin: 0; padding: 0; }
+
+#mood-bar { background: #2292FF; background: -moz-linear-gradient(left, #2292ff 0%, #7161ef 100%); background: -webkit-linear-gradient(left, #2292ff 0%, #7161ef 100%); background: linear-gradient(to right, #2292ff 0%, #7161ef 100%); filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#2292ff', endColorstr='#7161ef',GradientType=1 ); transition: background 300ms ease-in-out; height: 10px; }
