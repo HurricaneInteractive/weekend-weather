@@ -1,0 +1,19 @@
+{
+  "name": "weatherapp",
+  "version": "0.0.1",
+  "description": "Weather app to show you the weekend forcast",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-typescript": "^5.0.0-alpha.3",
+    "typescript": "^3.0.1"
+  },
+  "dependencies": {
+    "gulp-watch": "^5.0.1"
+  }
+}
