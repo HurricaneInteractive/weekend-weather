@@ -15,7 +15,8 @@ let local_storage: Storage = window.localStorage,
     user_location: string|null|object|Position = null,
     location_available: boolean = true,
     currentDate = new Date(),
-    currentWeather: Array<object>|null = null;
+    currentWeather: Array<object>|null = null,
+    loader: HTMLElement|null = document.getElementById('loading');
     
 const createElement = (dom_string: string) => {
     let template = document.createElement('template')
@@ -97,6 +98,9 @@ const setupApp = () => new Promise(resolve => {
 
 setupApp()
     .then(() => {
+        if (loader) {
+            loader.classList.add('loaded')
+        }
         // Remove Loading Animation
         console.log('Application Ready', username)
         console.log('Application Location', user_location)

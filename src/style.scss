@@ -5,7 +5,8 @@ $colours: (
     'blue': #2292FF,
     'grey': #8da9c4,
     'black': #02020B,
-    'border': rgba(141, 169, 196, 0.4)
+    'border': rgba(141, 169, 196, 0.4),
+    'white': #FFFFFF
 );
 
 $w-bold: 700;
@@ -154,6 +155,34 @@ label,
                 letter-spacing: 0.4px;
             }
         }
+    }
+}
+
+#loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    width: 100%;
+    height: 100%;
+    background: get-colour('blue');
+    background: -moz-linear-gradient(left, rgba(get-colour('blue'),1) 0%, rgba(get-colour('purple'),1) 100%);
+    background: -webkit-linear-gradient(left, rgba(get-colour('blue'),1) 0%,rgba(get-colour('purple'),1) 100%);
+    background: linear-gradient(to right, rgba(get-colour('blue'),1) 0%,rgba(get-colour('purple'),1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#2292ff', endColorstr='#7161ef',GradientType=1 );
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    opacity: 1;
+    transition: opacity 300ms ease-in-out;
+    .label {
+        margin-top: 10px;
+        color: get-colour('white');
+    }
+    &.loaded {
+        opacity: 0;
+        pointer-events: none;
     }
 }
 
