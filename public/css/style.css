@@ -26,6 +26,8 @@ label, .label { font-size: 0.75em; margin: 0; display: block; text-transform: up
 
 .c-border { color: rgba(141, 169, 196, 0.4); }
 
+.c-white { color: #FFFFFF; }
+
 .m-0 { margin: 0; }
 
 .fs-heading { font-size: 1.875em; }
@@ -49,5 +51,11 @@ label, .label { font-size: 0.75em; margin: 0; display: block; text-transform: up
 .appbar > .container .details .feather { margin-right: 15px; }
 
 .appbar > .container .details .city { letter-spacing: 0.4px; }
+
+#loading { position: fixed; top: 0; left: 0; z-index: 999; width: 100%; height: 100%; background: #2292FF; background: -moz-linear-gradient(left, #2292ff 0%, #7161ef 100%); background: -webkit-linear-gradient(left, #2292ff 0%, #7161ef 100%); background: linear-gradient(to right, #2292ff 0%, #7161ef 100%); filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#2292ff', endColorstr='#7161ef',GradientType=1 ); display: flex; justify-content: center; align-items: center; flex-direction: column; opacity: 1; transition: opacity 300ms ease-in-out; }
+
+#loading .label { margin-top: 10px; color: #FFFFFF; }
+
+#loading.loaded { opacity: 0; pointer-events: none; }
 
 #app { padding: 30px 0; }
