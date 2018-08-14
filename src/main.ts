@@ -7,17 +7,41 @@ const getIcon = (icon: string) => icons[icon]
 
 const KEY_USERNAME: string = 'username',
     KEY_LOCATION: string = 'location',
-    SVG_STRUCTURE: string = `<svg class="feather"><use xlink:href="img/feather-icons.svg#{{code}}"/></svg>`
+    SVG_STRUCTURE: string = `<svg class="feather"><use xlink:href="img/feather-icons.svg#{{code}}"/></svg>`,
+    API_KEY: string = 'a11c099d3dfac008f325d806a2e8e43f',
+    DARK_SKY: string = `https://api.darksky.net/forecast/${API_KEY}/`;
 
 let local_storage: Storage = window.localStorage,
     session_storage: Storage = window.sessionStorage,
     username: string|null = null,
-    user_location: string|null|object|Position = null,
+    user_location: any = null,
     location_available: boolean = true,
     currentDate = new Date(),
-    currentWeather: Array<object>|null = null,
+    current_weather: any = null,
     loader: HTMLElement|null = document.getElementById('loading');
-    
+
+// Overcome CORS on localhost
+const AJAX = (url: string) => {
+    return new Promise((resolve, reject) => {
+        let script = document.createElement('script')
+        const name = "_jsonp_" + Math.round(100000 * Math.random());
+        //url formatting
+        if (url.match(/\?/)) url += "&callback="+name
+        else url += "?callback="+name
+        script.src = url;
+
+        (<any>window)[name] = (data: any) => {
+            resolve(data);
+            document.body.removeChild(script);
+            delete (<any>window)[name];
+        }
+        document.body.appendChild(script);
+    });
+}
+
+const FtoC = (f: number) => Math.round( (f - 32) * 0.5556 ).toString()
+const CtoF = (c: number) => Math.round( (c * 1.8) + 32 ).toString()
+
 const createElement = (dom_string: string) => {
     let template = document.createElement('template')
     template.innerHTML = dom_string.trim()
@@ -40,8 +64,9 @@ const getUserLocation = (usr_pos: string|null) => {
     }
 }
 
-const updateHeaderIcon = () => {
-    let domDestination = document.querySelector('header.appbar .details .datetime-location');
+const updateHeader = () => {
+    let domDestination = document.querySelector('header.appbar .details .datetime-location'),
+        temp = document.querySelector('header .temp span');
 
     if (domDestination !== null) {
         let currentSvg = document.querySelector('header.appbar .details .feather'),
@@ -53,7 +78,7 @@ const updateHeaderIcon = () => {
                 svg_struct = getIcon(icon),
                 svg_dom = createElement(svg_struct);
             
-            console.log(svg_struct);
+            // console.log(svg_struct);
 
             if (svg_dom !== null) {
                 if (currentSvg) {
@@ -62,6 +87,10 @@ const updateHeaderIcon = () => {
                 parent.insertBefore(svg_dom, domDestination);
             }
         }
+    }
+
+    if (temp && current_weather) {
+        temp.innerHTML = FtoC(current_weather.currently.temperature);
     }
 }
 
@@ -72,7 +101,6 @@ const setupApp = () => new Promise(resolve => {
 
     getUserLocation(user_location)
         .then((position: any) => {
-
             if (typeof position.coords === 'undefined') {
                 user_location = null;
                 location_available = false;
@@ -86,11 +114,20 @@ const setupApp = () => new Promise(resolve => {
                 }
                 session_storage.setItem(KEY_LOCATION, JSON.stringify(user_location))
             }
-
-            console.log('Get Weather Details...');
-            updateHeaderIcon();
         })
         .catch(e => console.error('Location', e))
+        .then(() => {
+            let url = DARK_SKY + `${user_location.coords.latitude},${user_location.coords.longitude}`;
+            return AJAX(url)
+                .then((data) => {
+                    current_weather = data;
+                    console.log('Dark Sky Data', current_weather);
+                    
+                    updateHeader();
+                })
+                .catch(e => console.error('Dark Sky Fetch', e))
+        })
+        .catch(e => console.error('Dark Sky', e))
         .then(() => {
             resolve()
         })
