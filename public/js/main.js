@@ -1,11 +1,19 @@
 "use strict";
+/**
+ * TODO:
+ * - Update loading text while fetch data for user feedback
+ * - Fetch the city location
+ * - Save the weekend weather ready for population
+ * - Fetch Meetup data in the background and start filtering process
+ * - Get the secret data
+ */
 var icons = {
     "moon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"feather feather-moon\"><path d=\"M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z\"></path></svg>",
     "sun": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"feather feather-sun\"><circle cx=\"12\" cy=\"12\" r=\"5\"></circle><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"3\"></line><line x1=\"12\" y1=\"21\" x2=\"12\" y2=\"23\"></line><line x1=\"4.22\" y1=\"4.22\" x2=\"5.64\" y2=\"5.64\"></line><line x1=\"18.36\" y1=\"18.36\" x2=\"19.78\" y2=\"19.78\"></line><line x1=\"1\" y1=\"12\" x2=\"3\" y2=\"12\"></line><line x1=\"21\" y1=\"12\" x2=\"23\" y2=\"12\"></line><line x1=\"4.22\" y1=\"19.78\" x2=\"5.64\" y2=\"18.36\"></line><line x1=\"18.36\" y1=\"5.64\" x2=\"19.78\" y2=\"4.22\"></line></svg>"
 };
 var getIcon = function (icon) { return icons[icon]; };
 var KEY_USERNAME = 'username', KEY_LOCATION = 'location', SVG_STRUCTURE = "<svg class=\"feather\"><use xlink:href=\"img/feather-icons.svg#{{code}}\"/></svg>", API_KEY = 'a11c099d3dfac008f325d806a2e8e43f', DARK_SKY = "https://api.darksky.net/forecast/" + API_KEY + "/";
-var local_storage = window.localStorage, session_storage = window.sessionStorage, username = null, user_location = null, location_available = true, currentDate = new Date(), current_weather = null, loader = document.getElementById('loading');
+var local_storage = window.localStorage, session_storage = window.sessionStorage, username = null, user_location = null, location_available = true, currentDate = new Date(), current_weather = null, loader = document.getElementById('loading'), personal_name_input = document.getElementById('personal-name'), personal_name_save = document.getElementById('save-name'), welcome_message = document.querySelector('#app .welcome-msg');
 // Overcome CORS on localhost
 var AJAX = function (url) {
     return new Promise(function (resolve, reject) {
@@ -64,10 +72,31 @@ var updateHeader = function () {
         temp.innerHTML = FtoC(current_weather.currently.temperature);
     }
 };
-var setupApp = function () { return new Promise(function (resolve) {
+var updateApplicationUsername = function () {
     username = local_storage.getItem(KEY_USERNAME);
+    if (username !== null && welcome_message !== null) {
+        welcome_message.setAttribute('data-name', 'true');
+        var name_span = welcome_message.querySelector('.c-orange');
+        if (name_span !== null) {
+            name_span.innerHTML = username;
+        }
+    }
+};
+var saveApplicationUsername = function (e) {
+    e.preventDefault();
+    if (personal_name_input !== null) {
+        var name_1 = personal_name_input.value;
+        if (name_1.trim() === '') {
+            alert('Please enter a name');
+        }
+        local_storage.setItem(KEY_USERNAME, name_1);
+        updateApplicationUsername();
+    }
+};
+var setupApp = function () { return new Promise(function (resolve) {
+    updateApplicationUsername();
+    // local_storage.clear();
     user_location = session_storage.getItem(KEY_LOCATION);
-    // session_storage.clear();
     getUserLocation(user_location)
         .then(function (position) {
         if (typeof position.coords === 'undefined') {
@@ -108,5 +137,10 @@ setupApp()
     // Remove Loading Animation
     console.log('Application Ready', username);
     console.log('Application Location', user_location);
+    if (personal_name_save !== null) {
+        personal_name_save.addEventListener('click', function (e) {
+            saveApplicationUsername(e);
+        });
+    }
 })
     .catch(function (error) { return console.error('Error', error); });

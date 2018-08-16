@@ -4,6 +4,8 @@ body { font-family: 'Muli', sans-serif; font-size: 16px; font-weight: 700; color
 
 * { box-sizing: border-box; }
 
+*:focus { outline: none; }
+
 header { padding-top: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(141, 169, 196, 0.4); }
 
 h1, h2, h3 { font-size: 1.875em; font-weight: 900; margin: 0; line-height: 1; }
@@ -11,6 +13,8 @@ h1, h2, h3 { font-size: 1.875em; font-weight: 900; margin: 0; line-height: 1; }
 p, li { font-size: 0.875em; margin: 0; }
 
 label, .label { font-size: 0.75em; margin: 0; display: block; text-transform: uppercase; color: rgba(141, 169, 196, 0.4); }
+
+input { padding: 0; margin: 0; font-family: 'Muli', sans-serif; font-size: inherit; font-weight: 900; color: #FF6C5F; border: none; border-bottom: 1px solid #FF6C5F; width: 100%; }
 
 .c-purple { color: #7161EF; }
 
@@ -59,3 +63,17 @@ label, .label { font-size: 0.75em; margin: 0; display: block; text-transform: up
 #loading.loaded { opacity: 0; pointer-events: none; }
 
 #app { padding: 30px 0; }
+
+#app .welcome-msg[data-name="false"] span { display: none; }
+
+#app .welcome-msg:not([data-name="false"]) .input-group { display: none; }
+
+#app .welcome-msg .c-orange { display: block; line-height: 38px; border-bottom: 1px solid transparent; }
+
+#app .welcome-msg .input-group { display: flex; align-items: center; }
+
+#app .welcome-msg .input-group input { margin-right: 15px; }
+
+#app .welcome-msg .input-group button { width: 39px; height: 39px; border: none; background: #FF6C5F; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+
+#app .welcome-msg .input-group button .feather { stroke: white; }
