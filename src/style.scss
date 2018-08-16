@@ -54,6 +54,9 @@ body {
 
 * {
     box-sizing: border-box;
+    &:focus {
+        outline: none;
+    }
 }
 
 header {
@@ -81,6 +84,18 @@ label,
     display: block;
     text-transform: uppercase;
     color: rgba(get-colour('grey'), 0.4);
+}
+
+input {
+    padding: 0;
+    margin: 0;
+    font-family: 'Muli', sans-serif;
+    font-size: inherit;
+    font-weight: $w-black;
+    color: get-colour('orange');
+    border: none;
+    border-bottom: 1px solid get-colour('orange');
+    width: 100%;
 }
 
 @each $name, $color in $colours {
@@ -188,4 +203,41 @@ label,
 
 #app {
     padding: 30px 0;
+    .welcome-msg {
+        &[data-name="false"] {
+            span {
+                display: none;
+            }
+        }
+        &:not([data-name="false"]) {
+            .input-group {
+                display: none;
+            }
+        }
+        .c-orange {
+            display: block;
+            line-height: 38px;
+            border-bottom: 1px solid transparent;
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            input {
+                margin-right: 15px;
+            }
+            button {
+                width: 39px;
+                height: 39px;
+                border: none;
+                background: get-colour('orange');
+                border-radius: 50%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                .feather {
+                    stroke: white;
+                }
+            }
+        }
+    }
 }

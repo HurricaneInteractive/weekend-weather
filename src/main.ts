@@ -1,3 +1,12 @@
+/**
+ * TODO:
+ * - Update loading text while fetch data for user feedback
+ * - Fetch the city location
+ * - Save the weekend weather ready for population
+ * - Fetch Meetup data in the background and start filtering process
+ * - Get the secret data
+ */
+
 const icons: any = {
     "moon": `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-moon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`,
     "sun": `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`
@@ -18,7 +27,10 @@ let local_storage: Storage = window.localStorage,
     location_available: boolean = true,
     currentDate = new Date(),
     current_weather: any = null,
-    loader: HTMLElement|null = document.getElementById('loading');
+    loader: HTMLElement|null = document.getElementById('loading'),
+    personal_name_input: any = document.getElementById('personal-name'),
+    personal_name_save: HTMLElement|null = document.getElementById('save-name'),
+    welcome_message: HTMLElement|null = document.querySelector('#app .welcome-msg');
 
 // Overcome CORS on localhost
 const AJAX = (url: string) => {
@@ -94,10 +106,39 @@ const updateHeader = () => {
     }
 }
 
-const setupApp = () => new Promise(resolve => {
+const updateApplicationUsername = () => {
     username = local_storage.getItem(KEY_USERNAME)
+
+    if (username !== null && welcome_message !== null) {
+        welcome_message.setAttribute('data-name', 'true')
+        let name_span = welcome_message.querySelector('.c-orange');
+        
+        if (name_span !== null) {
+            name_span.innerHTML = username;
+        }
+    }
+}
+
+const saveApplicationUsername = (e: Event) => {
+    e.preventDefault();
+    if (personal_name_input !== null) {
+        let name = personal_name_input.value;
+
+        if (name.trim() === '') {
+            alert('Please enter a name');
+        }
+
+        local_storage.setItem(KEY_USERNAME, name);
+        updateApplicationUsername();
+    }
+}
+
+const setupApp = () => new Promise(resolve => {
+
+    updateApplicationUsername();
+    // local_storage.clear();
+
     user_location = session_storage.getItem(KEY_LOCATION)
-    // session_storage.clear();
 
     getUserLocation(user_location)
         .then((position: any) => {
@@ -141,5 +182,11 @@ setupApp()
         // Remove Loading Animation
         console.log('Application Ready', username)
         console.log('Application Location', user_location)
+
+        if (personal_name_save !== null) {
+            personal_name_save.addEventListener('click', (e) => {
+                saveApplicationUsername(e)
+            });
+        }
     })
     .catch(error => console.error('Error', error))
