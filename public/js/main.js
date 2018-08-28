@@ -12,8 +12,8 @@ var icons = {
     "sun": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"feather feather-sun\"><circle cx=\"12\" cy=\"12\" r=\"5\"></circle><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"3\"></line><line x1=\"12\" y1=\"21\" x2=\"12\" y2=\"23\"></line><line x1=\"4.22\" y1=\"4.22\" x2=\"5.64\" y2=\"5.64\"></line><line x1=\"18.36\" y1=\"18.36\" x2=\"19.78\" y2=\"19.78\"></line><line x1=\"1\" y1=\"12\" x2=\"3\" y2=\"12\"></line><line x1=\"21\" y1=\"12\" x2=\"23\" y2=\"12\"></line><line x1=\"4.22\" y1=\"19.78\" x2=\"5.64\" y2=\"18.36\"></line><line x1=\"18.36\" y1=\"5.64\" x2=\"19.78\" y2=\"4.22\"></line></svg>"
 };
 var getIcon = function (icon) { return icons[icon]; };
-var KEY_USERNAME = 'username', KEY_LOCATION = 'location', SVG_STRUCTURE = "<svg class=\"feather\"><use xlink:href=\"img/feather-icons.svg#{{code}}\"/></svg>", API_KEY = 'a11c099d3dfac008f325d806a2e8e43f', DARK_SKY = "https://api.darksky.net/forecast/" + API_KEY + "/";
-var local_storage = window.localStorage, session_storage = window.sessionStorage, username = null, user_location = null, location_available = true, currentDate = new Date(), current_weather = null, loader = document.getElementById('loading'), personal_name_input = document.getElementById('personal-name'), personal_name_save = document.getElementById('save-name'), welcome_message = document.querySelector('#app .welcome-msg');
+var KEY_USERNAME = 'username', KEY_LOCATION = 'location', KEY_CITY = 'city', SVG_STRUCTURE = "<svg class=\"feather\"><use xlink:href=\"img/feather-icons.svg#{{code}}\"/></svg>", API_KEY = 'a11c099d3dfac008f325d806a2e8e43f', MAPBOX_KEY = 'pk.eyJ1IjoidGhlLXR1cnRsZSIsImEiOiJjamxkOXVlajgwOTN4M3FwaDFjbHRtMTZ6In0.7XM2WPENWe5p0PLeSoBc2Q', DARK_SKY = "https://api.darksky.net/forecast/" + API_KEY + "/", MAPBOX = 'https://api.mapbox.com';
+var local_storage = window.localStorage, session_storage = window.sessionStorage, username = null, user_location = null, user_city = null, location_available = true, currentDate = new Date(), current_weather = null, loader = document.getElementById('loading'), personal_name_input = document.getElementById('personal-name'), personal_name_save = document.getElementById('save-name'), welcome_message = document.querySelector('#app .welcome-msg');
 // Overcome CORS on localhost
 var AJAX = function (url) {
     return new Promise(function (resolve, reject) {
@@ -93,9 +93,32 @@ var saveApplicationUsername = function (e) {
         updateApplicationUsername();
     }
 };
+var getUserLocationCity = function () {
+    var city = session_storage.getItem(KEY_CITY);
+    if (city !== null && city !== '') {
+        user_city = city;
+    }
+};
+var updateUserCity = function (city) {
+    var cityDOM = document.querySelector('p[data-city]');
+    if (cityDOM !== null) {
+        cityDOM.innerHTML = city;
+    }
+};
+var updateDatetime = function () {
+    var dateString = currentDate.toDateString(), time = currentDate.toLocaleTimeString(), year = dateString.match(/\d{4}/gm), day = dateString.match(/(\d{1,2}\s)/gm), month = dateString.match(/\s(\D{3})\s/gm), hour = currentDate.getHours();
+    time = time.replace(/(:\d{2}$)/gm, '');
+    if (year && day && month && time && hour) {
+        var datetimeDOM = document.querySelector('p[data-datetime]');
+        if (datetimeDOM) {
+            datetimeDOM.innerHTML = day[0].trim() + " " + month[0].trim() + " " + year[0].trim() + " // " + time.trim() + (hour > 12 ? 'PM' : 'AM');
+        }
+    }
+};
 var setupApp = function () { return new Promise(function (resolve) {
     updateApplicationUsername();
-    // local_storage.clear();
+    getUserLocationCity();
+    updateDatetime();
     user_location = session_storage.getItem(KEY_LOCATION);
     getUserLocation(user_location)
         .then(function (position) {
@@ -114,6 +137,21 @@ var setupApp = function () { return new Promise(function (resolve) {
         }
     })
         .catch(function (e) { return console.error('Location', e); })
+        .then(function () {
+        if (user_city === null) {
+            var url = MAPBOX + "/geocoding/v5/mapbox.places/" + user_location.coords.longitude + "%2C" + user_location.coords.latitude + ".json?access_token=" + MAPBOX_KEY + "&types=place";
+            return fetch(url)
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                updateUserCity(data.features[0].text);
+                session_storage.setItem(KEY_CITY, data.features[0].text);
+            })
+                .catch(function (e) { return console.error(e); });
+        }
+        else {
+            updateUserCity(user_city);
+        }
+    })
         .then(function () {
         var url = DARK_SKY + (user_location.coords.latitude + "," + user_location.coords.longitude);
         return AJAX(url)
