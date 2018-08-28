@@ -16,14 +16,18 @@ const getIcon = (icon: string) => icons[icon]
 
 const KEY_USERNAME: string = 'username',
     KEY_LOCATION: string = 'location',
+    KEY_CITY: string = 'city',
     SVG_STRUCTURE: string = `<svg class="feather"><use xlink:href="img/feather-icons.svg#{{code}}"/></svg>`,
     API_KEY: string = 'a11c099d3dfac008f325d806a2e8e43f',
-    DARK_SKY: string = `https://api.darksky.net/forecast/${API_KEY}/`;
+    MAPBOX_KEY: string = 'pk.eyJ1IjoidGhlLXR1cnRsZSIsImEiOiJjamxkOXVlajgwOTN4M3FwaDFjbHRtMTZ6In0.7XM2WPENWe5p0PLeSoBc2Q',
+    DARK_SKY: string = `https://api.darksky.net/forecast/${API_KEY}/`,
+    MAPBOX: string = 'https://api.mapbox.com'
 
 let local_storage: Storage = window.localStorage,
     session_storage: Storage = window.sessionStorage,
     username: string|null = null,
     user_location: any = null,
+    user_city: any = null,
     location_available: boolean = true,
     currentDate = new Date(),
     current_weather: any = null,
@@ -133,10 +137,43 @@ const saveApplicationUsername = (e: Event) => {
     }
 }
 
+const getUserLocationCity = () => {
+    let city = session_storage.getItem(KEY_CITY)
+    if (city !== null && city !== '') {
+        user_city = city
+    }
+}
+
+const updateUserCity = (city: string) => {
+    let cityDOM: any = document.querySelector('p[data-city]')
+    if (cityDOM !== null) {
+        cityDOM.innerHTML = city
+    }
+}
+
+const updateDatetime = () => {
+    let dateString = currentDate.toDateString(),
+        time = currentDate.toLocaleTimeString(),
+        year = dateString.match(/\d{4}/gm),
+        day = dateString.match(/(\d{1,2}\s)/gm),
+        month = dateString.match(/\s(\D{3})\s/gm),
+        hour = currentDate.getHours()
+
+    time = time.replace(/(:\d{2}$)/gm, '')
+    
+    if (year && day && month && time && hour) {
+        let datetimeDOM = document.querySelector('p[data-datetime]')
+        if (datetimeDOM) {
+            datetimeDOM.innerHTML = `${day[0].trim()} ${month[0].trim()} ${year[0].trim()} // ${time.trim()}${ hour > 12 ? 'PM' : 'AM' }`
+        }
+    }
+}
+
 const setupApp = () => new Promise(resolve => {
 
     updateApplicationUsername();
-    // local_storage.clear();
+    getUserLocationCity();
+    updateDatetime();
 
     user_location = session_storage.getItem(KEY_LOCATION)
 
@@ -157,6 +194,21 @@ const setupApp = () => new Promise(resolve => {
             }
         })
         .catch(e => console.error('Location', e))
+        .then(() => {
+            if (user_city === null) {
+                let url = `${MAPBOX}/geocoding/v5/mapbox.places/${user_location.coords.longitude}%2C${user_location.coords.latitude}.json?access_token=${MAPBOX_KEY}&types=place`
+                return fetch(url)
+                    .then(res => res.json())
+                    .then(data => {
+                        updateUserCity(data.features[0].text)
+                        session_storage.setItem(KEY_CITY, data.features[0].text)
+                    })
+                    .catch(e => console.error(e))
+            }
+            else {
+                updateUserCity(user_city)
+            }
+        })
         .then(() => {
             let url = DARK_SKY + `${user_location.coords.latitude},${user_location.coords.longitude}`;
             return AJAX(url)
