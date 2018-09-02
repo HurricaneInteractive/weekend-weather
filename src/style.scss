@@ -240,4 +240,36 @@ input {
             }
         }
     }
+    .app-options {
+        margin-top: 40px;
+        .option {
+            &:not(:last-child) {
+                margin-bottom: 30px;
+            }
+            .label {
+                color: get-colour('grey');
+                text-transform: initial;
+                font-size: em(14px);
+                margin-bottom: 10px;
+            }
+            .card {
+                padding: 35px 70px;
+                border-radius: 10px;
+                background: get-colour('orange');
+                box-shadow: 0 3px 10px 0 rgba(get-colour('black'), 0.3);
+                text-align: center;
+                &.weekend-planner {
+                    background: get-colour('purple');
+                    background: linear-gradient(135deg, get-colour('purple') 0%,get-colour('blue') 100%);
+                }
+                &.historical-pattern {
+                    background: get-colour('orange');
+                    background: linear-gradient(135deg, get-colour('orange') 0%,get-colour('purple') 100%);
+                }
+                h3 {
+                    color: white;
+                }
+            }
+        }
+    }
 }
