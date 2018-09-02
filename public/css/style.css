@@ -77,3 +77,17 @@ input { padding: 0; margin: 0; font-family: 'Muli', sans-serif; font-size: inher
 #app .welcome-msg .input-group button { width: 39px; height: 39px; border: none; background: #FF6C5F; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
 
 #app .welcome-msg .input-group button .feather { stroke: white; }
+
+#app .app-options { margin-top: 40px; }
+
+#app .app-options .option:not(:last-child) { margin-bottom: 30px; }
+
+#app .app-options .option .label { color: #8da9c4; text-transform: initial; font-size: 0.875em; margin-bottom: 10px; }
+
+#app .app-options .option .card { padding: 35px 70px; border-radius: 10px; background: #FF6C5F; box-shadow: 0 3px 10px 0 rgba(2, 2, 11, 0.3); text-align: center; }
+
+#app .app-options .option .card.weekend-planner { background: #7161EF; background: linear-gradient(135deg, #7161EF 0%, #2292FF 100%); }
+
+#app .app-options .option .card.historical-pattern { background: #FF6C5F; background: linear-gradient(135deg, #FF6C5F 0%, #7161EF 100%); }
+
+#app .app-options .option .card h3 { color: white; }
