@@ -104,6 +104,8 @@ header {
     top: 10px;
     left: 0;
     width: 100%;
+    z-index: 10;
+    background: white;
 }
 
 h1, h2, h3 {
@@ -193,6 +195,7 @@ input {
     top: 0;
     left: 0;
     width: 100%;
+    z-index: 10;
 }
 
 .appbar {
