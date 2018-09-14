@@ -43,7 +43,8 @@ const KEY_USERNAME: string = 'username',
     API_KEY: string = 'a11c099d3dfac008f325d806a2e8e43f',
     MAPBOX_KEY: string = 'pk.eyJ1IjoidGhlLXR1cnRsZSIsImEiOiJjamxkOXVlajgwOTN4M3FwaDFjbHRtMTZ6In0.7XM2WPENWe5p0PLeSoBc2Q',
     DARK_SKY: string = `https://api.darksky.net/forecast/${API_KEY}/`,
-    MAPBOX: string = 'https://api.mapbox.com'
+    MAPBOX: string = 'https://api.mapbox.com',
+    MEETUP: string = 'https://api.meetup.com/find/upcoming_events?&sign=true&key=73a5379b4f15491cd4b6be472161&photo-host=public'
 
 let local_storage: Storage = window.localStorage,
     session_storage: Storage = window.sessionStorage,
@@ -306,6 +307,43 @@ const populateWeekendPage = (data: Array<object>) => {
     }
 }
 
+const meetupTemplate = (event: any) => {
+    let name = event.name,
+        link = event.link,
+        local_date = event.local_date,
+        local_time = event.local_time
+
+    return `
+        <a href="${link}" target="_blank" rel="noopener noreferrer" class="event-card">
+            <p class="date">${local_date} // ${local_time}</p>
+            <h4>${name}</h4>
+        </a>
+    `
+}
+
+const populateMeetup = (data: Array<object>) => {
+    let meetupDOM = data.map(item => meetupTemplate(item))
+
+    return createElement(`
+        <div class="meetup-section">
+            <h2>Meetups</h2>
+            <div class="meetup-listing">
+                ${meetupDOM.join('')}
+            </div>
+        </div>
+    `)
+}
+
+const getDateISOFormat = (time: number) => {
+    let date = new Date(time * 1000),
+        day = date.toDateString().match(/(\d{1,2}\s)/gm),
+        month = (date.getMonth() + 1) < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1
+
+    if (day && month) {
+        return `${date.getFullYear()}-${month}-${day[0].trim()}T${date.toLocaleTimeString()}`
+    }
+}
+
 const setupApp = () => new Promise(resolve => {
 
     updateApplicationUsername();
@@ -375,11 +413,12 @@ setupApp()
             });
         }
 
-        let weekend_weather = getUpcomingWeekendWeather(current_weather.daily.data),
-            back_arrow = document.querySelector('.appbar .details .feather.back-arrow')
+        let weekend_weather: any = getUpcomingWeekendWeather(current_weather.daily.data),
+            back_arrow = document.querySelector('.appbar .details .feather.back-arrow'),
+            weekend_card = document.querySelector('#app .app-options .option .card.weekend-planner')
+        
         populateWeekendPage(weekend_weather);
 
-        let weekend_card = document.querySelector('#app .app-options .option .card.weekend-planner')
         if (weekend_card) {
             weekend_card.addEventListener('click', (e) => {
                 e.preventDefault()
@@ -397,5 +436,25 @@ setupApp()
                 }
             })
         }
+
+        let end_date_range = getDateISOFormat(weekend_weather[1].time)
+        let start_date_range = getDateISOFormat(weekend_weather[0].time)
+
+        let meetupURL = `${MEETUP}&lon=${user_location.coords.longitude}&lat=${user_location.coords.latitude}&radius=10&page=50&topic_category=15892&end_date_range=${end_date_range}&start_date_range=${start_date_range}`
+
+        AJAX(meetupURL)
+            .then((data: any) => {
+                if (typeof data.errors !== 'undefined') return false
+
+                let meetupDOM = populateMeetup(data.data.events)
+                
+                if (weekend_page) {
+                    let target = weekend_page.querySelector('.forecast-wrapper')
+                    if (target && meetupDOM) {
+                        target.appendChild(meetupDOM)
+                    }
+                }
+            })
+            .catch(e => console.error('Meetup', e))
     })
     .catch(error => console.error('Error', error))
