@@ -247,7 +247,7 @@ const weekendTemplate = (data: any) => {
             { icon: 'wind', label: 'wind gust', value: `${Math.floor(data.windGust)}km/h` }
         ],        
         [
-            { icon: 'droplet', label: 'participation', value: `${data.precipProbability * 100}%` },
+            { icon: 'droplet', label: 'participation', value: `${Math.floor(data.precipProbability * 100)}%` },
             { icon: 'rain', label: 'type', value: data.precipType }
         ]
     ]
@@ -255,7 +255,7 @@ const weekendTemplate = (data: any) => {
     let boxesDomString = boxes.map((box) => dailyWeatherData(box))
 
     let stats = [
-        { label: 'cloud cover', value: `${data.cloudCover * 100}%` },
+        { label: 'cloud cover', value: `${Math.floor(data.cloudCover * 100)}%` },
         { label: 'humidity', value: `${Math.floor(data.humidity * 100)}%` },
         { label: 'temp low', value: `${Math.floor(data.temperatureLow)}&deg;` },
         { label: 'temp high', value: `${Math.floor(data.temperatureHigh)}&deg;` },
@@ -384,8 +384,13 @@ setupApp()
         if (weekend_card) {
             weekend_card.addEventListener('click', (e) => {
                 e.preventDefault()
-                if (body) {
-                    body.classList.add('weekend-open')
+                if (weekend_page) {
+                    weekend_page.style.display = 'block';
+                    setTimeout(() => {
+                        if (body) {
+                            body.classList.add('weekend-open')
+                        }
+                    }, 5)
                 }
             })
         }
@@ -395,6 +400,11 @@ setupApp()
                 e.preventDefault()
                 if (body) {
                     body.classList.remove('weekend-open')
+                    setTimeout(() => {
+                        if (weekend_page) {
+                            weekend_page.style.display = 'none';
+                        }
+                    }, 605)
                 }
             })
         }
