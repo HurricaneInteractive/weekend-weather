@@ -263,8 +263,9 @@ input {
 #app {
     padding: 30px 0;
     position: relative;
-    overflow-y: hidden;
     overflow-x: hidden;
+    overflow-y: hidden;
+    @include vh-polyfill('height', 100, -89px);
     .welcome-msg {
         &[data-name="false"] {
             span {
@@ -342,6 +343,7 @@ input {
     top: 0;
     left: 0;
     width: 100%;
+    height: 100%;
     z-index: 9;
     background: white;
     transform: translateX(100%);
@@ -350,11 +352,9 @@ input {
 
 body.weekend-open {
     #app {
-        overflow-x: hidden;
-        overflow-y: auto;
-        @include vh-polyfill('height', 100, -89px);
         #page--weekend-planner {
             transform: translateX(0);
+            overflow-y: auto;
         }
     }
 }
