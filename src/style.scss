@@ -273,3 +273,31 @@ input {
         }
     }
 }
+
+.forecast-wrapper {
+    padding-top: 30px;
+    padding-bottom: 30px;
+    .forecast-section {
+        margin-bottom: 30px;
+        .box-wrapper {
+            margin-top: 20px;
+            .box {
+                border: 1px solid get-colour('border');
+                border-radius: 10px;
+                padding: 20px;
+                display: flex;
+                &:not(:first-child) {
+                    margin-top: 10px;
+                }
+                .box-item {
+                    width: 50%;
+                    display: flex;
+                    align-items: center;
+                    .data {
+                        margin-left: 10px;
+                    }
+                }
+            }
+        }
+    }
+}
