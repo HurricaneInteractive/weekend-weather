@@ -9,7 +9,8 @@
 interface DailyWeather {
     icon: string,
     label: string,
-    value: string
+    value: string,
+    deg?: number
 }
 
 const icons: any = {
@@ -29,7 +30,8 @@ const icons: any = {
     'sunrise': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sunrise"><path d="M17 18a5 5 0 0 0-10 0"></path><line x1="12" y1="2" x2="12" y2="9"></line><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"></line><line x1="1" y1="18" x2="3" y2="18"></line><line x1="21" y1="18" x2="23" y2="18"></line><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"></line><line x1="23" y1="22" x2="1" y2="22"></line><polyline points="8 6 12 2 16 6"></polyline></svg>',
     'sunset': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sunset"><path d="M17 18a5 5 0 0 0-10 0"></path><line x1="12" y1="9" x2="12" y2="2"></line><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"></line><line x1="1" y1="18" x2="3" y2="18"></line><line x1="21" y1="18" x2="23" y2="18"></line><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"></line><line x1="23" y1="22" x2="1" y2="22"></line><polyline points="16 5 12 9 8 5"></polyline></svg>`,
     "droplet": `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-droplet"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>`,
-    "wind-dir": `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-navigation-2"><polygon points="12 2 19 21 12 17 5 21 12 2"></polygon></svg>`
+    "wind-dir": `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-navigation-2"><polygon points="12 2 19 21 12 17 5 21 12 2"></polygon></svg>`,
+    "arrow-down": `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down"><polyline points="6 9 12 15 18 9"></polyline></svg>`
 };
 
 const getIcon = (icon: string) => icons[icon]
@@ -55,7 +57,9 @@ let local_storage: Storage = window.localStorage,
     personal_name_input: any = document.getElementById('personal-name'),
     personal_name_save: HTMLElement|null = document.getElementById('save-name'),
     welcome_message: HTMLElement|null = document.querySelector('#app .welcome-msg'),
-    weekend_page: HTMLElement|null = document.getElementById('page--weekend-planner')
+    weekend_page: HTMLElement|null = document.getElementById('page--weekend-planner'),
+    app: HTMLElement|null = document.getElementById('app'),
+    body: HTMLElement|null = document.body
 
 // Overcome CORS on localhost
 const AJAX = (url: string) => {
@@ -102,11 +106,11 @@ const getUserLocation = (usr_pos: string|null) => {
 }
 
 const updateHeader = () => {
-    let domDestination = document.querySelector('header.appbar .details .datetime-location'),
+    let domDestination = document.querySelector('header.appbar .details .details-icon .back-arrow'),
         temp = document.querySelector('header .temp span');
 
     if (domDestination !== null) {
-        let currentSvg = document.querySelector('header.appbar .details .feather'),
+        let currentSvg = document.querySelector('header.appbar .details .feather.target'),
             parent = domDestination.parentNode;
         if (parent !== null) {
             let icon = current_weather.currently.icon,
@@ -211,7 +215,9 @@ const dailyWeatherData = (items: Array<DailyWeather>) => {
     let box_items = items.map(item => (
         `
             <div class="box-item">
-                ${getIcon(item.icon)}
+                ${ typeof item.deg !== 'undefined' ? `<span style="transform: rotate(${item.deg}deg);">` : '' }
+                    ${getIcon(item.icon)}
+                ${ typeof item.deg !== 'undefined' ? '</span>' : '' }
                 <div class="data">
                     <span class="label">${item.label}</span>
                     <p>${item.value}</p>
@@ -237,7 +243,7 @@ const weekendTemplate = (data: any) => {
             { icon: 'sunset', label: 'sunset', value: `${sunsetHour}:${sunsetMinutes}${ sunsetHour >= 12 ? 'pm' : 'am' }` }
         ],
         [
-            { icon: 'wind-dir', label: 'wind', value: `${Math.floor(data.windSpeed)}km/h` },
+            { icon: 'wind-dir', label: 'wind', value: `${Math.floor(data.windSpeed)}km/h`, deg: data.windBearing },
             { icon: 'wind', label: 'wind gust', value: `${Math.floor(data.windGust)}km/h` }
         ],        
         [
@@ -247,6 +253,27 @@ const weekendTemplate = (data: any) => {
     ]
 
     let boxesDomString = boxes.map((box) => dailyWeatherData(box))
+
+    let stats = [
+        { label: 'cloud cover', value: `${data.cloudCover * 100}%` },
+        { label: 'humidity', value: `${Math.floor(data.humidity * 100)}%` },
+        { label: 'temp low', value: `${Math.floor(data.temperatureLow)}&deg;` },
+        { label: 'temp high', value: `${Math.floor(data.temperatureHigh)}&deg;` },
+        { label: 'UV index', value: data.uvIndex }
+    ]
+
+    boxesDomString.push(
+        `
+            <div class="box stats">
+                <p class="label c-black">Stats for geeks${getIcon('arrow-down')}</p>
+                <ul class="stats-wrapper">
+                    ${
+                        stats.map((item) => ( `<li class="stat"><span class="label c-purple">${item.label}</span><p>${item.value}</p></li>` )).join('')
+                    }
+                </ul>
+            </div>
+        `
+    )
 
     const elemString = `
         <div class="forecast-section">
@@ -266,6 +293,16 @@ const populateWeekendPage = (data: Array<object>) => {
 
     if (weekend_page !== null && forecastElem !== null) {
         weekend_page.appendChild(forecastElem)
+
+        let box_stats = weekend_page.querySelectorAll('.forecast-section .box-wrapper .box.stats');
+        if (box_stats) {
+            for (let x = 0; x < box_stats.length; x++) {
+                box_stats[x].addEventListener('click', (e) => {
+                    e.preventDefault();
+                    box_stats[x].classList.toggle('open');
+                })
+            }
+        }
     }
 }
 
@@ -338,8 +375,28 @@ setupApp()
             });
         }
 
-        let weekend_weather = getUpcomingWeekendWeather(current_weather.daily.data);
+        let weekend_weather = getUpcomingWeekendWeather(current_weather.daily.data),
+            back_arrow = document.querySelector('.appbar .details .feather.back-arrow')
         console.log('weekend', weekend_weather)
         populateWeekendPage(weekend_weather);
+
+        let weekend_card = document.querySelector('#app .app-options .option .card.weekend-planner')
+        if (weekend_card) {
+            weekend_card.addEventListener('click', (e) => {
+                e.preventDefault()
+                if (body) {
+                    body.classList.add('weekend-open')
+                }
+            })
+        }
+
+        if (back_arrow) {
+            back_arrow.addEventListener('click', (e) => {
+                e.preventDefault()
+                if (body) {
+                    body.classList.remove('weekend-open')
+                }
+            })
+        }
     })
     .catch(error => console.error('Error', error))
