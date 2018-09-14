@@ -54,7 +54,8 @@ let local_storage: Storage = window.localStorage,
     loader: HTMLElement|null = document.getElementById('loading'),
     personal_name_input: any = document.getElementById('personal-name'),
     personal_name_save: HTMLElement|null = document.getElementById('save-name'),
-    welcome_message: HTMLElement|null = document.querySelector('#app .welcome-msg');
+    welcome_message: HTMLElement|null = document.querySelector('#app .welcome-msg'),
+    weekend_page: HTMLElement|null = document.getElementById('page--weekend-planner')
 
 // Overcome CORS on localhost
 const AJAX = (url: string) => {
@@ -236,12 +237,12 @@ const weekendTemplate = (data: any) => {
             { icon: 'sunset', label: 'sunset', value: `${sunsetHour}:${sunsetMinutes}${ sunsetHour >= 12 ? 'pm' : 'am' }` }
         ],
         [
-            { icon: 'wind-dir', label: 'wind', value: '' },
-            { icon: 'wind', label: 'wind gust', value: '' }
-        ],
+            { icon: 'wind-dir', label: 'wind', value: `${Math.floor(data.windSpeed)}km/h` },
+            { icon: 'wind', label: 'wind gust', value: `${Math.floor(data.windGust)}km/h` }
+        ],        
         [
-            { icon: 'droplet', label: 'participation', value: '' },
-            { icon: 'rain', label: 'type', value: '' }
+            { icon: 'droplet', label: 'participation', value: `${data.precipProbability * 100}%` },
+            { icon: 'rain', label: 'type', value: data.precipType }
         ]
     ]
 
@@ -249,22 +250,23 @@ const weekendTemplate = (data: any) => {
 
     const elemString = `
         <div class="forecast-section">
-            <h2>${data.day}</h2>
-            <span class="c-orange"></span>
+            <h2>${data.day}<br><span class="c-orange">${Math.floor(data.apparentTemperatureHigh)}&deg;</span></h2>
             <div class="box-wrapper">
                 ${boxesDomString.join('')}
             </div>
         </div>
     `
 
-    // console.log(createElement(elemString));
     return elemString;
 }
 
 const populateWeekendPage = (data: Array<object>) => {
-    let forecastDOM = data.map(item => weekendTemplate(item))
+    let forecastDOM = data.map(item => weekendTemplate(item)),
+        forecastElem = createElement( '<div class="forecast-wrapper container">' + forecastDOM.join('') + '</div>' )
 
-    console.log(createElement('<div class="forecast-wrapper">' + forecastDOM.join('') + '</div>' ))
+    if (weekend_page !== null && forecastElem !== null) {
+        weekend_page.appendChild(forecastElem)
+    }
 }
 
 const setupApp = () => new Promise(resolve => {
