@@ -27,7 +27,7 @@ var icons = {
     "arrow-down": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"feather feather-chevron-down\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg>"
 };
 var getIcon = function (icon) { return icons[icon]; };
-var KEY_USERNAME = 'username', KEY_LOCATION = 'location', KEY_CITY = 'city', SVG_STRUCTURE = "<svg class=\"feather\"><use xlink:href=\"img/feather-icons.svg#{{code}}\"/></svg>", API_KEY = 'a11c099d3dfac008f325d806a2e8e43f', MAPBOX_KEY = 'pk.eyJ1IjoidGhlLXR1cnRsZSIsImEiOiJjamxkOXVlajgwOTN4M3FwaDFjbHRtMTZ6In0.7XM2WPENWe5p0PLeSoBc2Q', DARK_SKY = "https://api.darksky.net/forecast/" + API_KEY + "/", MAPBOX = 'https://api.mapbox.com';
+var KEY_USERNAME = 'username', KEY_LOCATION = 'location', KEY_CITY = 'city', SVG_STRUCTURE = "<svg class=\"feather\"><use xlink:href=\"img/feather-icons.svg#{{code}}\"/></svg>", API_KEY = 'a11c099d3dfac008f325d806a2e8e43f', MAPBOX_KEY = 'pk.eyJ1IjoidGhlLXR1cnRsZSIsImEiOiJjamxkOXVlajgwOTN4M3FwaDFjbHRtMTZ6In0.7XM2WPENWe5p0PLeSoBc2Q', DARK_SKY = "https://api.darksky.net/forecast/" + API_KEY + "/", MAPBOX = 'https://api.mapbox.com', MEETUP = 'https://api.meetup.com/find/upcoming_events?&sign=true&key=73a5379b4f15491cd4b6be472161&photo-host=public';
 var local_storage = window.localStorage, session_storage = window.sessionStorage, username = null, user_location = null, user_city = null, location_available = true, currentDate = new Date(), current_weather = null, loader = document.getElementById('loading'), personal_name_input = document.getElementById('personal-name'), personal_name_save = document.getElementById('save-name'), welcome_message = document.querySelector('#app .welcome-msg'), weekend_page = document.getElementById('page--weekend-planner'), app = document.getElementById('app'), body = document.body;
 // Overcome CORS on localhost
 var AJAX = function (url) {
@@ -194,6 +194,20 @@ var populateWeekendPage = function (data) {
         }
     }
 };
+var meetupTemplate = function (event) {
+    var name = event.name, link = event.link, local_date = event.local_date, local_time = event.local_time;
+    return "\n        <a href=\"" + link + "\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"event-card\">\n            <p class=\"date\">" + local_date + " // " + local_time + "</p>\n            <h4>" + name + "</h4>\n        </a>\n    ";
+};
+var populateMeetup = function (data) {
+    var meetupDOM = data.map(function (item) { return meetupTemplate(item); });
+    return createElement("\n        <div class=\"meetup-section\">\n            <h2>Meetups</h2>\n            <div class=\"meetup-listing\">\n                " + meetupDOM.join('') + "\n            </div>\n        </div>\n    ");
+};
+var getDateISOFormat = function (time) {
+    var date = new Date(time * 1000), day = date.toDateString().match(/(\d{1,2}\s)/gm), month = (date.getMonth() + 1) < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
+    if (day && month) {
+        return date.getFullYear() + "-" + month + "-" + day[0].trim() + "T" + date.toLocaleTimeString();
+    }
+};
 var setupApp = function () { return new Promise(function (resolve) {
     updateApplicationUsername();
     getUserLocationCity();
@@ -252,9 +266,8 @@ setupApp()
             saveApplicationUsername(e);
         });
     }
-    var weekend_weather = getUpcomingWeekendWeather(current_weather.daily.data), back_arrow = document.querySelector('.appbar .details .feather.back-arrow');
+    var weekend_weather = getUpcomingWeekendWeather(current_weather.daily.data), back_arrow = document.querySelector('.appbar .details .feather.back-arrow'), weekend_card = document.querySelector('#app .app-options .option .card.weekend-planner');
     populateWeekendPage(weekend_weather);
-    var weekend_card = document.querySelector('#app .app-options .option .card.weekend-planner');
     if (weekend_card) {
         weekend_card.addEventListener('click', function (e) {
             e.preventDefault();
@@ -271,4 +284,19 @@ setupApp()
             }
         });
     }
+    var end_date_range = getDateISOFormat(weekend_weather[1].time);
+    var start_date_range = getDateISOFormat(weekend_weather[0].time);
+    var meetupURL = MEETUP + "&lon=" + user_location.coords.longitude + "&lat=" + user_location.coords.latitude + "&radius=10&page=50&topic_category=15892&end_date_range=" + end_date_range + "&start_date_range=" + start_date_range;
+    AJAX(meetupURL)
+        .then(function (data) {
+        if (typeof data.errors !== 'undefined')
+            return false;
+        var meetupDOM = populateMeetup(data.data.events);
+        if (weekend_page) {
+            var target = weekend_page.querySelector('.forecast-wrapper');
+            if (target && meetupDOM) {
+                target.appendChild(meetupDOM);
+            }
+        }
+    })["catch"](function (e) { return console.error('Meetup', e); });
 })["catch"](function (error) { return console.error('Error', error); });

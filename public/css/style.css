@@ -16,6 +16,12 @@ label, .label { font-size: 0.75em; margin: 0; display: block; text-transform: up
 
 input { padding: 0; margin: 0; font-family: 'Muli', sans-serif; font-size: inherit; font-weight: 900; color: #FF6C5F; border: none; border-bottom: 1px solid #FF6C5F; width: 100%; }
 
+input::-moz-placeholder { color: rgba(141, 169, 196, 0.4); }
+
+input::-webkit-input-placeholder { color: rgba(141, 169, 196, 0.4); }
+
+input::placeholder { color: rgba(141, 169, 196, 0.4); }
+
 .c-purple { color: #7161EF; }
 
 .c-orange { color: #FF6C5F; }
@@ -141,3 +147,19 @@ body.weekend-open #page--weekend-planner { display: block; }
 .forecast-wrapper .forecast-section .box-wrapper .box.stats .stats-wrapper li { display: flex; justify-content: space-between; align-items: center; }
 
 .forecast-wrapper .forecast-section .box-wrapper .box.stats .stats-wrapper li:not(:first-child) { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(141, 169, 196, 0.4); }
+
+.forecast-wrapper .meetup-section > h2 { margin-bottom: 20px; }
+
+.forecast-wrapper .meetup-section .meetup-listing { display: flex; flex-wrap: nowrap; padding: 0 0 20px; overflow-x: scroll; position: relative; }
+
+.forecast-wrapper .meetup-section .meetup-listing .event-card { display: inline-flex; margin-right: 20px; min-width: 290px; max-width: 290px; width: 100%; padding: 20px; color: white; height: 200px; justify-content: flex-end; align-items: flex-start; flex-direction: column; text-decoration: none; border-radius: 10px; box-shadow: 0 3px 10px rgba(2, 2, 11, 0.3); }
+
+.forecast-wrapper .meetup-section .meetup-listing .event-card:nth-child(odd) { background: linear-gradient(to right, #2292ff 0%, #7161ef 100%); }
+
+.forecast-wrapper .meetup-section .meetup-listing .event-card:nth-child(even) { background: linear-gradient(to right, #ff6c5f 0%, #7161ef 100%); }
+
+.forecast-wrapper .meetup-section .meetup-listing .event-card p, .forecast-wrapper .meetup-section .meetup-listing .event-card h4 { margin: 0; }
+
+.forecast-wrapper .meetup-section .meetup-listing .event-card p { font-size: 12px; font-weight: 700; }
+
+.forecast-wrapper .meetup-section .meetup-listing .event-card h4 { font-size: 16px; font-weight: 900; }
