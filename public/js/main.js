@@ -160,13 +160,13 @@ var weekendTemplate = function (data) {
             { icon: 'wind', label: 'wind gust', value: Math.floor(data.windGust) + "km/h" }
         ],
         [
-            { icon: 'droplet', label: 'participation', value: data.precipProbability * 100 + "%" },
+            { icon: 'droplet', label: 'participation', value: Math.floor(data.precipProbability * 100) + "%" },
             { icon: 'rain', label: 'type', value: data.precipType }
         ]
     ];
     var boxesDomString = boxes.map(function (box) { return dailyWeatherData(box); });
     var stats = [
-        { label: 'cloud cover', value: data.cloudCover * 100 + "%" },
+        { label: 'cloud cover', value: Math.floor(data.cloudCover * 100) + "%" },
         { label: 'humidity', value: Math.floor(data.humidity * 100) + "%" },
         { label: 'temp low', value: Math.floor(data.temperatureLow) + "&deg;" },
         { label: 'temp high', value: Math.floor(data.temperatureHigh) + "&deg;" },
@@ -214,8 +214,7 @@ var setupApp = function () { return new Promise(function (resolve) {
             };
             session_storage.setItem(KEY_LOCATION, JSON.stringify(user_location));
         }
-    })
-        .catch(function (e) { return console.error('Location', e); })
+    })["catch"](function (e) { return console.error('Location', e); })
         .then(function () {
         if (user_city === null) {
             var url = MAPBOX + "/geocoding/v5/mapbox.places/" + user_location.coords.longitude + "%2C" + user_location.coords.latitude + ".json?access_token=" + MAPBOX_KEY + "&types=place";
@@ -224,8 +223,7 @@ var setupApp = function () { return new Promise(function (resolve) {
                 .then(function (data) {
                 updateUserCity(data.features[0].text);
                 session_storage.setItem(KEY_CITY, data.features[0].text);
-            })
-                .catch(function (e) { return console.error(e); });
+            })["catch"](function (e) { return console.error(e); });
         }
         else {
             updateUserCity(user_city);
@@ -238,10 +236,8 @@ var setupApp = function () { return new Promise(function (resolve) {
             current_weather = data;
             console.log('Dark Sky Data', current_weather);
             updateHeader();
-        })
-            .catch(function (e) { return console.error('Dark Sky Fetch', e); });
-    })
-        .catch(function (e) { return console.error('Dark Sky', e); })
+        })["catch"](function (e) { return console.error('Dark Sky Fetch', e); });
+    })["catch"](function (e) { return console.error('Dark Sky', e); })
         .then(function () {
         resolve();
     });
@@ -263,8 +259,13 @@ setupApp()
     if (weekend_card) {
         weekend_card.addEventListener('click', function (e) {
             e.preventDefault();
-            if (body) {
-                body.classList.add('weekend-open');
+            if (weekend_page) {
+                weekend_page.style.display = 'block';
+                setTimeout(function () {
+                    if (body) {
+                        body.classList.add('weekend-open');
+                    }
+                }, 5);
             }
         });
     }
@@ -273,8 +274,12 @@ setupApp()
             e.preventDefault();
             if (body) {
                 body.classList.remove('weekend-open');
+                setTimeout(function () {
+                    if (weekend_page) {
+                        weekend_page.style.display = 'none';
+                    }
+                }, 605);
             }
         });
     }
-})
-    .catch(function (error) { return console.error('Error', error); });
+})["catch"](function (error) { return console.error('Error', error); });
