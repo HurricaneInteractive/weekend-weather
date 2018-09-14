@@ -377,20 +377,14 @@ setupApp()
 
         let weekend_weather = getUpcomingWeekendWeather(current_weather.daily.data),
             back_arrow = document.querySelector('.appbar .details .feather.back-arrow')
-        console.log('weekend', weekend_weather)
         populateWeekendPage(weekend_weather);
 
         let weekend_card = document.querySelector('#app .app-options .option .card.weekend-planner')
         if (weekend_card) {
             weekend_card.addEventListener('click', (e) => {
                 e.preventDefault()
-                if (weekend_page) {
-                    weekend_page.style.display = 'block';
-                    setTimeout(() => {
-                        if (body) {
-                            body.classList.add('weekend-open')
-                        }
-                    }, 5)
+                if (body) {
+                    body.classList.add('weekend-open')
                 }
             })
         }
@@ -400,11 +394,6 @@ setupApp()
                 e.preventDefault()
                 if (body) {
                     body.classList.remove('weekend-open')
-                    setTimeout(() => {
-                        if (weekend_page) {
-                            weekend_page.style.display = 'none';
-                        }
-                    }, 605)
                 }
             })
         }
