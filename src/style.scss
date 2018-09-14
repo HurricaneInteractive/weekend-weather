@@ -86,7 +86,7 @@ body {
     font-weight: $w-bold;
     color: get-colour('black');
     margin: 0;
-    padding: 10px 0 0;
+    padding: 89px 0 0;
 }
 
 * {
@@ -100,6 +100,10 @@ header {
     padding-top: 20px;
     padding-bottom: 20px;
     border-bottom: 1px solid get-colour('border');
+    position: fixed;
+    top: 10px;
+    left: 0;
+    width: 100%;
 }
 
 h1, h2, h3 {
@@ -265,7 +269,7 @@ input {
     position: relative;
     overflow-x: hidden;
     overflow-y: hidden;
-    @include vh-polyfill('height', 100, -89px);
+    @include vh-polyfill('min-height', 100, -89px);
     .welcome-msg {
         &[data-name="false"] {
             span {
