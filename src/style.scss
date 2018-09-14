@@ -104,6 +104,15 @@ input {
     border: none;
     border-bottom: 1px solid get-colour('orange');
     width: 100%;
+    &::-moz-placeholder {
+        color: get-colour('border');
+    }
+    &::-webkit-input-placeholder {
+        color: get-colour('border');
+    }
+    &::placeholder {
+        color: get-colour('border');
+    }
 }
 
 @each $name, $color in $colours {
@@ -405,6 +414,52 @@ body.weekend-open {
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+    .meetup-section {
+        > h2 {
+            margin-bottom: 20px;
+        }
+        .meetup-listing {
+            // width: 100%;
+            display: flex;
+            flex-wrap: nowrap;
+            padding: 0 0 20px;
+            overflow-x: scroll;
+            position: relative;
+            .event-card {
+                display: inline-flex;
+                margin-right: 20px;
+                min-width: 290px;
+                max-width: 290px;
+                width: 100%;
+                padding: 20px;
+                color: white;
+                height: 200px;
+                justify-content: flex-end;
+                align-items: flex-start;
+                flex-direction: column;
+                text-decoration: none;
+                border-radius: 10px;
+                box-shadow: 0 3px 10px rgba(get-colour('black'), .3);
+                &:nth-child(odd) {
+                    background: linear-gradient(to right, rgba(get-colour('blue'),1) 0%,rgba(get-colour('purple'),1) 100%);
+                }
+                &:nth-child(even) {
+                    background: linear-gradient(to right, rgba(get-colour('orange'),1) 0%,rgba(get-colour('purple'),1) 100%);
+                }
+                p, h4 {
+                    margin: 0;
+                }
+                p {
+                    font-size: $label;
+                    font-weight: $w-bold;
+                }
+                h4 {
+                    font-size: $base-font-size;
+                    font-weight: $w-black;
                 }
             }
         }
