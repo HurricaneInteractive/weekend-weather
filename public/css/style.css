@@ -94,7 +94,7 @@ main { overflow-x: hidden; position: relative; }
 
 #app .app-options .option .label { color: #8da9c4; text-transform: initial; font-size: 0.875em; margin-bottom: 10px; }
 
-#app .app-options .option .card { padding: 35px 70px; border-radius: 10px; background: #FF6C5F; box-shadow: 0 15px 35px rgba(2, 2, 11, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07); text-align: center; cursor: pointer; }
+#app .app-options .option .card { padding: 35px 20px; border-radius: 10px; background: #FF6C5F; box-shadow: 0 15px 35px rgba(2, 2, 11, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07); text-align: center; cursor: pointer; }
 
 #app .app-options .option .card.weekend-planner { background: #7161EF; background: linear-gradient(135deg, #7161EF 0%, #2292FF 100%); }
 
