@@ -70,25 +70,9 @@ body.weekend-open .appbar > .container .details .details-icon .feather:not(.back
 
 #loading.loaded { opacity: 0; pointer-events: none; }
 
-main { height: calc(100vh + -89px); overflow-x: hidden; overflow-y: auto; position: relative; }
+main { height: calc(100vh - 89px); overflow-x: hidden; overflow-y: auto; position: relative; }
 
-@media all and (device-width: 768px) and (device-height: 1024px) and (orientation: portrait) { main { height: 935px; } }
-
-@media all and (device-width: 768px) and (device-height: 1024px) and (orientation: landscape) { main { height: 679px; } }
-
-@media screen and (device-aspect-ratio: 40 / 71) { main { height: 411px; } }
-
-@media screen and (device-width: 320px) and (device-aspect-ratio: 2 / 3) and (orientation: portrait) { main { height: 391px; } }
-
-#app { padding: 30px 0; position: relative; overflow-x: hidden; overflow-y: hidden; min-height: calc(100vh + -89px); }
-
-@media all and (device-width: 768px) and (device-height: 1024px) and (orientation: portrait) { #app { min-height: 935px; } }
-
-@media all and (device-width: 768px) and (device-height: 1024px) and (orientation: landscape) { #app { min-height: 679px; } }
-
-@media screen and (device-aspect-ratio: 40 / 71) { #app { min-height: 411px; } }
-
-@media screen and (device-width: 320px) and (device-aspect-ratio: 2 / 3) and (orientation: portrait) { #app { min-height: 391px; } }
+#app { padding: 30px 0; position: relative; overflow-x: hidden; overflow-y: hidden; }
 
 #app .welcome-msg[data-name="false"] span { display: none; }
 
