@@ -302,7 +302,8 @@ main {
             &:not(:last-child) {
                 margin-bottom: 30px;
             }
-            .label {
+            > .label,
+            #hourly-info > .label {
                 color: get-colour('grey');
                 text-transform: initial;
                 font-size: em(14px);
@@ -344,6 +345,24 @@ body.weekend-open {
     }
 }
 
+.box {
+    border: 1px solid get-colour('border');
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    &:not(:first-child) {
+        margin-top: 10px;
+    }
+    .box-item {
+        width: 50%;
+        display: flex;
+        align-items: center;
+        .data {
+            margin-left: 10px;
+        }
+    }
+}
+
 .forecast-wrapper {
     padding-top: 30px;
     padding-bottom: 30px;
@@ -360,21 +379,6 @@ body.weekend-open {
         .box-wrapper {
             margin-top: 20px;
             .box {
-                border: 1px solid get-colour('border');
-                border-radius: 10px;
-                padding: 20px;
-                display: flex;
-                &:not(:first-child) {
-                    margin-top: 10px;
-                }
-                .box-item {
-                    width: 50%;
-                    display: flex;
-                    align-items: center;
-                    .data {
-                        margin-left: 10px;
-                    }
-                }
                 &.stats {
                     border-color: get-colour('purple');
                     display: block;
@@ -483,6 +487,20 @@ body.weekend-open {
                     color: get-colour('black');
                 }
             }
+        }
+    }
+}
+
+.hourly-wrapper {
+    display: flex;
+    flex-wrap: nowrap;
+    padding: 0 0 20px;
+    overflow-x: scroll;
+    position: relative;
+    .box {
+        margin: 0 20px 0 0;
+        .box-item {
+            width: 100%;
         }
     }
 }
