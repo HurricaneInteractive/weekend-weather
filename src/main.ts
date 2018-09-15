@@ -249,7 +249,7 @@ const weekendTemplate = (data: any) => {
         ],        
         [
             { icon: 'droplet', label: 'participation', value: `${Math.floor(data.precipProbability * 100)}%` },
-            { icon: 'rain', label: 'type', value: data.precipType }
+            { icon: 'rain', label: 'type', value: data.precipType || 'none' }
         ]
     ]
 
@@ -322,7 +322,18 @@ const meetupTemplate = (event: any) => {
 }
 
 const populateMeetup = (data: Array<object>) => {
-    let meetupDOM = data.map(item => meetupTemplate(item))
+    let meetupDOM = []
+    if (data.length === 0) {
+        meetupDOM.push(`
+            <div class="no-results">
+                <h4>No Meetups Found</h4>
+                <a href="https://www.meetup.com/" target="_blank" rel="noopener noreferrer">Visit Meetup</a>
+            </div>
+        `)
+    }
+    else {
+        meetupDOM = data.map(item => meetupTemplate(item))
+    }
 
     return createElement(`
         <div class="meetup-section">
@@ -403,8 +414,8 @@ const setupApp = () => new Promise(resolve => {
 
 setupApp()
     .then(() => {
-        if (loader) {
-            loader.classList.add('loaded')
+        if (body) {
+            body.classList.add('loaded')
         }
 
         if (personal_name_save !== null) {
@@ -423,6 +434,7 @@ setupApp()
             weekend_card.addEventListener('click', (e) => {
                 e.preventDefault()
                 if (body) {
+                    window.scrollTo(0, 0)
                     body.classList.add('weekend-open')
                 }
             })
@@ -432,6 +444,7 @@ setupApp()
             back_arrow.addEventListener('click', (e) => {
                 e.preventDefault()
                 if (body) {
+                    window.scrollTo(0, 0)
                     body.classList.remove('weekend-open')
                 }
             })
@@ -445,14 +458,24 @@ setupApp()
         AJAX(meetupURL)
             .then((data: any) => {
                 if (typeof data.errors !== 'undefined') return false
-
-                let meetupDOM = populateMeetup(data.data.events)
                 
-                if (weekend_page) {
-                    let target = weekend_page.querySelector('.forecast-wrapper')
-                    if (target && meetupDOM) {
-                        target.appendChild(meetupDOM)
+                if (start_date_range && end_date_range) {
+                    let start = start_date_range.replace(/(T\d{2}:\d{2}:\d{2})/gm, ''),
+                        end = end_date_range.replace(/(T\d{2}:\d{2}:\d{2})/gm, '')
+
+                    let events = data.data.events.filter((item: any) => {
+                        return item.local_date === start || item.local_date === end
+                    })
+
+                    let meetupDOM = populateMeetup(events)
+                
+                    if (weekend_page) {
+                        let target = weekend_page.querySelector('.forecast-wrapper')
+                        if (target && meetupDOM) {
+                            target.appendChild(meetupDOM)
+                        }
                     }
+
                 }
             })
             .catch(e => console.error('Meetup', e))
