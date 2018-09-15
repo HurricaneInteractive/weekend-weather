@@ -74,7 +74,7 @@ body.weekend-open .appbar > .container .details .details-icon .feather:not(.back
 
 #loading .label { margin-top: 10px; color: #FFFFFF; }
 
-#loading.loaded { opacity: 0; pointer-events: none; }
+body.loaded #loading { opacity: 0; pointer-events: none; }
 
 main { overflow-x: hidden; position: relative; }
 
@@ -96,6 +96,12 @@ main { overflow-x: hidden; position: relative; }
 
 #app .app-options { margin-top: 40px; }
 
+#app .app-options .option { transform: translateY(50px); opacity: 0; }
+
+body.loaded #app .app-options .option { animation: fadeInUp 800ms cubic-bezier(0.215, 0.61, 0.355, 1) 300ms forwards; }
+
+body.loaded #app .app-options .option:nth-child(2) { animation-delay: 450ms; }
+
 #app .app-options .option:not(:last-child) { margin-bottom: 30px; }
 
 #app .app-options .option .label { color: #8da9c4; text-transform: initial; font-size: 0.875em; margin-bottom: 10px; }
@@ -116,7 +122,11 @@ body.weekend-open #page--weekend-planner { display: block; }
 
 .forecast-wrapper { padding-top: 30px; padding-bottom: 30px; }
 
-.forecast-wrapper .forecast-section { margin-bottom: 30px; }
+.forecast-wrapper .forecast-section { margin-bottom: 30px; transform: translateY(50px); opacity: 0; }
+
+body.weekend-open .forecast-wrapper .forecast-section { animation: fadeInUp 800ms cubic-bezier(0.215, 0.61, 0.355, 1) 300ms forwards; }
+
+body.weekend-open .forecast-wrapper .forecast-section:nth-child(2) { animation-delay: 450ms; }
 
 .forecast-wrapper .forecast-section .box-wrapper { margin-top: 20px; }
 
@@ -127,8 +137,6 @@ body.weekend-open #page--weekend-planner { display: block; }
 .forecast-wrapper .forecast-section .box-wrapper .box .box-item { width: 50%; display: flex; align-items: center; }
 
 .forecast-wrapper .forecast-section .box-wrapper .box .box-item .data { margin-left: 10px; }
-
-.forecast-wrapper .forecast-section .box-wrapper .box .box-item .data p { text-transform: capitalize; }
 
 .forecast-wrapper .forecast-section .box-wrapper .box.stats { border-color: #7161EF; display: block; }
 
@@ -163,3 +171,12 @@ body.weekend-open #page--weekend-planner { display: block; }
 .forecast-wrapper .meetup-section .meetup-listing .event-card p { font-size: 12px; font-weight: 700; }
 
 .forecast-wrapper .meetup-section .meetup-listing .event-card h4 { font-size: 16px; font-weight: 900; }
+
+.forecast-wrapper .meetup-section .meetup-listing .no-results h4 { margin: 0 0 15px; text-transform: uppercase; color: rgba(141, 169, 196, 0.4); }
+
+.forecast-wrapper .meetup-section .meetup-listing .no-results a { display: inline-block; text-decoration: none; font-size: 0.75em; padding: 19px 35px; border: 1px solid #7161EF; border-radius: 10px; text-transform: uppercase; line-height: 1; color: #02020B; }
+
+@keyframes fadeInUp { from { transform: translateY(50px);
+    opacity: 0; }
+  to { transform: translateY(0);
+    opacity: 1; } }

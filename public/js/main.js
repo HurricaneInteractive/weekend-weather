@@ -161,7 +161,7 @@ var weekendTemplate = function (data) {
         ],
         [
             { icon: 'droplet', label: 'participation', value: Math.floor(data.precipProbability * 100) + "%" },
-            { icon: 'rain', label: 'type', value: data.precipType }
+            { icon: 'rain', label: 'type', value: data.precipType || 'none' }
         ]
     ];
     var boxesDomString = boxes.map(function (box) { return dailyWeatherData(box); });
@@ -199,7 +199,13 @@ var meetupTemplate = function (event) {
     return "\n        <a href=\"" + link + "\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"event-card\">\n            <p class=\"date\">" + local_date + " // " + local_time + "</p>\n            <h4>" + name + "</h4>\n        </a>\n    ";
 };
 var populateMeetup = function (data) {
-    var meetupDOM = data.map(function (item) { return meetupTemplate(item); });
+    var meetupDOM = [];
+    if (data.length === 0) {
+        meetupDOM.push("\n            <div class=\"no-results\">\n                <h4>No Meetups Found</h4>\n                <a href=\"https://www.meetup.com/\" target=\"_blank\" rel=\"noopener noreferrer\">Visit Meetup</a>\n            </div>\n        ");
+    }
+    else {
+        meetupDOM = data.map(function (item) { return meetupTemplate(item); });
+    }
     return createElement("\n        <div class=\"meetup-section\">\n            <h2>Meetups</h2>\n            <div class=\"meetup-listing\">\n                " + meetupDOM.join('') + "\n            </div>\n        </div>\n    ");
 };
 var getDateISOFormat = function (time) {
@@ -258,8 +264,8 @@ var setupApp = function () { return new Promise(function (resolve) {
 }); };
 setupApp()
     .then(function () {
-    if (loader) {
-        loader.classList.add('loaded');
+    if (body) {
+        body.classList.add('loaded');
     }
     if (personal_name_save !== null) {
         personal_name_save.addEventListener('click', function (e) {
@@ -272,6 +278,7 @@ setupApp()
         weekend_card.addEventListener('click', function (e) {
             e.preventDefault();
             if (body) {
+                window.scrollTo(0, 0);
                 body.classList.add('weekend-open');
             }
         });
@@ -280,6 +287,7 @@ setupApp()
         back_arrow.addEventListener('click', function (e) {
             e.preventDefault();
             if (body) {
+                window.scrollTo(0, 0);
                 body.classList.remove('weekend-open');
             }
         });
@@ -291,11 +299,17 @@ setupApp()
         .then(function (data) {
         if (typeof data.errors !== 'undefined')
             return false;
-        var meetupDOM = populateMeetup(data.data.events);
-        if (weekend_page) {
-            var target = weekend_page.querySelector('.forecast-wrapper');
-            if (target && meetupDOM) {
-                target.appendChild(meetupDOM);
+        if (start_date_range && end_date_range) {
+            var start_1 = start_date_range.replace(/(T\d{2}:\d{2}:\d{2})/gm, ''), end_1 = end_date_range.replace(/(T\d{2}:\d{2}:\d{2})/gm, '');
+            var events = data.data.events.filter(function (item) {
+                return item.local_date === start_1 || item.local_date === end_1;
+            });
+            var meetupDOM = populateMeetup(events);
+            if (weekend_page) {
+                var target = weekend_page.querySelector('.forecast-wrapper');
+                if (target && meetupDOM) {
+                    target.appendChild(meetupDOM);
+                }
             }
         }
     })["catch"](function (e) { return console.error('Meetup', e); });
