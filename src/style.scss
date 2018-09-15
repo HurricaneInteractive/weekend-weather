@@ -49,7 +49,7 @@ body {
     font-weight: $w-bold;
     color: get-colour('black');
     margin: 0;
-    padding: 89px 0 0;
+    padding: 89px 0 60px;
     overflow-x: hidden;
     position: relative;
 }
@@ -251,6 +251,7 @@ main {
     position: relative;
     overflow-x: hidden;
     overflow-y: hidden;
+    min-height: calc(100vh - 89px);
     .welcome-msg {
         &[data-name="false"] {
             span {
@@ -513,5 +514,20 @@ body.weekend-open {
     to {
         transform: translateY(0);
         opacity: 1;
+    }
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    padding: 20px 0;
+    p {
+        margin: 0;
+        a {
+            color: get-colour('purple');
+        }
     }
 }

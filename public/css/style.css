@@ -1,6 +1,6 @@
 .clearfix:after { content: ''; clear: both; display: table; }
 
-body { font-family: 'Muli', sans-serif; font-size: 16px; font-weight: 700; color: #02020B; margin: 0; padding: 89px 0 0; overflow-x: hidden; position: relative; }
+body { font-family: 'Muli', sans-serif; font-size: 16px; font-weight: 700; color: #02020B; margin: 0; padding: 89px 0 60px; overflow-x: hidden; position: relative; }
 
 * { box-sizing: border-box; }
 
@@ -78,7 +78,7 @@ body.loaded #loading { opacity: 0; pointer-events: none; }
 
 main { overflow-x: hidden; position: relative; }
 
-#app { padding: 30px 0; position: relative; overflow-x: hidden; overflow-y: hidden; }
+#app { padding: 30px 0; position: relative; overflow-x: hidden; overflow-y: hidden; min-height: calc(100vh - 89px); }
 
 #app .welcome-msg[data-name="false"] span { display: none; }
 
@@ -186,3 +186,9 @@ body.weekend-open .forecast-wrapper .forecast-section:nth-child(2) { animation-d
     opacity: 0; }
   to { transform: translateY(0);
     opacity: 1; } }
+
+footer { position: absolute; bottom: 0; left: 0; width: 100%; text-align: center; padding: 20px 0; }
+
+footer p { margin: 0; }
+
+footer p a { color: #7161EF; }
