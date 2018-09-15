@@ -1,11 +1,4 @@
 "use strict";
-/**
- * TODO:
- * - Update loading text while fetch data for user feedback
- * - Save the weekend weather ready for population
- * - Fetch Meetup data in the background and start filtering process
- * - Get the secret data
- */
 var icons = {
     "clear-night": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"feather feather-moon\"><path d=\"M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z\"></path></svg>",
     "clear-day": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"feather feather-sun\"><circle cx=\"12\" cy=\"12\" r=\"5\"></circle><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"3\"></line><line x1=\"12\" y1=\"21\" x2=\"12\" y2=\"23\"></line><line x1=\"4.22\" y1=\"4.22\" x2=\"5.64\" y2=\"5.64\"></line><line x1=\"18.36\" y1=\"18.36\" x2=\"19.78\" y2=\"19.78\"></line><line x1=\"1\" y1=\"12\" x2=\"3\" y2=\"12\"></line><line x1=\"21\" y1=\"12\" x2=\"23\" y2=\"12\"></line><line x1=\"4.22\" y1=\"19.78\" x2=\"5.64\" y2=\"18.36\"></line><line x1=\"18.36\" y1=\"5.64\" x2=\"19.78\" y2=\"4.22\"></line></svg>",
@@ -27,8 +20,8 @@ var icons = {
     "arrow-down": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"feather feather-chevron-down\"><polyline points=\"6 9 12 15 18 9\"></polyline></svg>"
 };
 var getIcon = function (icon) { return icons[icon]; };
-var KEY_USERNAME = 'username', KEY_LOCATION = 'location', KEY_CITY = 'city', SVG_STRUCTURE = "<svg class=\"feather\"><use xlink:href=\"img/feather-icons.svg#{{code}}\"/></svg>", API_KEY = 'a11c099d3dfac008f325d806a2e8e43f', MAPBOX_KEY = 'pk.eyJ1IjoidGhlLXR1cnRsZSIsImEiOiJjamxkOXVlajgwOTN4M3FwaDFjbHRtMTZ6In0.7XM2WPENWe5p0PLeSoBc2Q', DARK_SKY = "https://api.darksky.net/forecast/" + API_KEY + "/", MAPBOX = 'https://api.mapbox.com', MEETUP = 'https://api.meetup.com/find/upcoming_events?&sign=true&key=73a5379b4f15491cd4b6be472161&photo-host=public';
-var local_storage = window.localStorage, session_storage = window.sessionStorage, username = null, user_location = null, user_city = null, location_available = true, currentDate = new Date(), current_weather = null, loader = document.getElementById('loading'), personal_name_input = document.getElementById('personal-name'), personal_name_save = document.getElementById('save-name'), welcome_message = document.querySelector('#app .welcome-msg'), weekend_page = document.getElementById('page--weekend-planner'), app = document.getElementById('app'), body = document.body;
+var KEY_USERNAME = 'username', KEY_LOCATION = 'location', KEY_CITY = 'city', API_KEY = 'a11c099d3dfac008f325d806a2e8e43f', MAPBOX_KEY = 'pk.eyJ1IjoidGhlLXR1cnRsZSIsImEiOiJjamxkOXVlajgwOTN4M3FwaDFjbHRtMTZ6In0.7XM2WPENWe5p0PLeSoBc2Q', DARK_SKY = "https://api.darksky.net/forecast/" + API_KEY + "/", MAPBOX = 'https://api.mapbox.com', MEETUP = 'https://api.meetup.com/find/upcoming_events?&sign=true&key=73a5379b4f15491cd4b6be472161&photo-host=public';
+var local_storage = window.localStorage, session_storage = window.sessionStorage, username = null, user_location = null, user_city = null, location_available = true, currentDate = new Date(), current_weather = null, loader = document.getElementById('loading'), personal_name_input = document.getElementById('personal-name'), personal_name_save = document.getElementById('save-name'), welcome_message = document.querySelector('#app .welcome-msg'), weekend_page = document.getElementById('page--weekend-planner'), app = document.getElementById('app'), body = document.body, hourly_wrapper = document.getElementById('hourly-info');
 // Overcome CORS on localhost
 var AJAX = function (url) {
     return new Promise(function (resolve, reject) {
@@ -214,6 +207,17 @@ var getDateISOFormat = function (time) {
         return date.getFullYear() + "-" + month + "-" + day[0].trim() + "T" + date.toLocaleTimeString();
     }
 };
+var displayHourlyForecast = function (data) {
+    var hourly = data.map(function (item) {
+        var date = new Date(item.time * 1000), time = date.toLocaleTimeString(), hour = date.getHours();
+        time = time.replace(/(:\d{2}$)/gm, '');
+        return "\n            <div class=\"box\">\n                <div class=\"box-item\">\n                    " + getIcon(item.icon) + "\n                    <div class=\"data\">\n                        <span class=\"label\">" + time + (hour >= 12 ? 'pm' : 'am') + "</span>\n                        <p>" + Math.floor(item.apparentTemperature) + "&deg;</p>\n                    </div>\n                </div>\n            </div>\n        ";
+    });
+    var hourly_dom = createElement("<div class=\"hourly-wrapper\">" + hourly.join('') + "</div>");
+    if (hourly_wrapper && hourly_dom) {
+        hourly_wrapper.appendChild(hourly_dom);
+    }
+};
 var setupApp = function () { return new Promise(function (resolve) {
     updateApplicationUsername();
     getUserLocationCity();
@@ -250,12 +254,13 @@ var setupApp = function () { return new Promise(function (resolve) {
         }
     })
         .then(function () {
-        var url = DARK_SKY + (user_location.coords.latitude + "," + user_location.coords.longitude + "?units=ca&exclude=[minutely,alerts,flags,hourly]");
+        var url = DARK_SKY + (user_location.coords.latitude + "," + user_location.coords.longitude + "?units=ca&exclude=[minutely,alerts,flags]");
         return AJAX(url)
             .then(function (data) {
             current_weather = data;
             console.log('Dark Sky Data', current_weather);
             updateHeader();
+            displayHourlyForecast(current_weather.hourly.data);
         })["catch"](function (e) { return console.error('Dark Sky Fetch', e); });
     })["catch"](function (e) { return console.error('Dark Sky', e); })
         .then(function () {

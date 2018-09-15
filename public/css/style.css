@@ -104,7 +104,7 @@ body.loaded #app .app-options .option:nth-child(2) { animation-delay: 450ms; }
 
 #app .app-options .option:not(:last-child) { margin-bottom: 30px; }
 
-#app .app-options .option .label { color: #8da9c4; text-transform: initial; font-size: 0.875em; margin-bottom: 10px; }
+#app .app-options .option > .label, #app .app-options .option #hourly-info > .label { color: #8da9c4; text-transform: initial; font-size: 0.875em; margin-bottom: 10px; }
 
 #app .app-options .option .card { padding: 35px 20px; border-radius: 10px; background: #FF6C5F; box-shadow: 0 15px 35px rgba(2, 2, 11, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07); text-align: center; cursor: pointer; }
 
@@ -120,6 +120,14 @@ body.weekend-open #app { display: none; }
 
 body.weekend-open #page--weekend-planner { display: block; }
 
+.box { border: 1px solid rgba(141, 169, 196, 0.4); border-radius: 10px; padding: 20px; display: flex; }
+
+.box:not(:first-child) { margin-top: 10px; }
+
+.box .box-item { width: 50%; display: flex; align-items: center; }
+
+.box .box-item .data { margin-left: 10px; }
+
 .forecast-wrapper { padding-top: 30px; padding-bottom: 30px; }
 
 .forecast-wrapper .forecast-section { margin-bottom: 30px; transform: translateY(50px); opacity: 0; }
@@ -129,14 +137,6 @@ body.weekend-open .forecast-wrapper .forecast-section { animation: fadeInUp 800m
 body.weekend-open .forecast-wrapper .forecast-section:nth-child(2) { animation-delay: 450ms; }
 
 .forecast-wrapper .forecast-section .box-wrapper { margin-top: 20px; }
-
-.forecast-wrapper .forecast-section .box-wrapper .box { border: 1px solid rgba(141, 169, 196, 0.4); border-radius: 10px; padding: 20px; display: flex; }
-
-.forecast-wrapper .forecast-section .box-wrapper .box:not(:first-child) { margin-top: 10px; }
-
-.forecast-wrapper .forecast-section .box-wrapper .box .box-item { width: 50%; display: flex; align-items: center; }
-
-.forecast-wrapper .forecast-section .box-wrapper .box .box-item .data { margin-left: 10px; }
 
 .forecast-wrapper .forecast-section .box-wrapper .box.stats { border-color: #7161EF; display: block; }
 
@@ -175,6 +175,12 @@ body.weekend-open .forecast-wrapper .forecast-section:nth-child(2) { animation-d
 .forecast-wrapper .meetup-section .meetup-listing .no-results h4 { margin: 0 0 15px; text-transform: uppercase; color: rgba(141, 169, 196, 0.4); }
 
 .forecast-wrapper .meetup-section .meetup-listing .no-results a { display: inline-block; text-decoration: none; font-size: 0.75em; padding: 19px 35px; border: 1px solid #7161EF; border-radius: 10px; text-transform: uppercase; line-height: 1; color: #02020B; }
+
+.hourly-wrapper { display: flex; flex-wrap: nowrap; padding: 0 0 20px; overflow-x: scroll; position: relative; }
+
+.hourly-wrapper .box { margin: 0 20px 0 0; }
+
+.hourly-wrapper .box .box-item { width: 100%; }
 
 @keyframes fadeInUp { from { transform: translateY(50px);
     opacity: 0; }
