@@ -1,11 +1,3 @@
-/**
- * TODO:
- * - Update loading text while fetch data for user feedback
- * - Save the weekend weather ready for population
- * - Fetch Meetup data in the background and start filtering process
- * - Get the secret data
- */
-
 interface DailyWeather {
     icon: string,
     label: string,
@@ -39,7 +31,6 @@ const getIcon = (icon: string) => icons[icon]
 const KEY_USERNAME: string = 'username',
     KEY_LOCATION: string = 'location',
     KEY_CITY: string = 'city',
-    SVG_STRUCTURE: string = `<svg class="feather"><use xlink:href="img/feather-icons.svg#{{code}}"/></svg>`,
     API_KEY: string = 'a11c099d3dfac008f325d806a2e8e43f',
     MAPBOX_KEY: string = 'pk.eyJ1IjoidGhlLXR1cnRsZSIsImEiOiJjamxkOXVlajgwOTN4M3FwaDFjbHRtMTZ6In0.7XM2WPENWe5p0PLeSoBc2Q',
     DARK_SKY: string = `https://api.darksky.net/forecast/${API_KEY}/`,
@@ -60,7 +51,8 @@ let local_storage: Storage = window.localStorage,
     welcome_message: HTMLElement|null = document.querySelector('#app .welcome-msg'),
     weekend_page: HTMLElement|null = document.getElementById('page--weekend-planner'),
     app: HTMLElement|null = document.getElementById('app'),
-    body: HTMLElement|null = document.body
+    body: HTMLElement|null = document.body,
+    hourly_wrapper: HTMLElement|null = document.getElementById('hourly-info')
 
 // Overcome CORS on localhost
 const AJAX = (url: string) => {
@@ -355,6 +347,32 @@ const getDateISOFormat = (time: number) => {
     }
 }
 
+const displayHourlyForecast = (data: any) => {
+    let hourly = data.map((item: any) => {
+        let date = new Date(item.time * 1000),
+            time = date.toLocaleTimeString(),
+            hour = date.getHours()
+        time = time.replace(/(:\d{2}$)/gm, '');
+
+        return `
+            <div class="box">
+                <div class="box-item">
+                    ${getIcon(item.icon)}
+                    <div class="data">
+                        <span class="label">${time}${ hour >= 12 ? 'pm' : 'am' }</span>
+                        <p>${Math.floor(item.apparentTemperature)}&deg;</p>
+                    </div>
+                </div>
+            </div>
+        `
+    })
+    let hourly_dom = createElement(`<div class="hourly-wrapper">${hourly.join('')}</div>`)
+
+    if (hourly_wrapper && hourly_dom) {
+        hourly_wrapper.appendChild( hourly_dom );
+    }
+}
+
 const setupApp = () => new Promise(resolve => {
 
     updateApplicationUsername();
@@ -396,13 +414,14 @@ const setupApp = () => new Promise(resolve => {
             }
         })
         .then(() => {
-            let url = DARK_SKY + `${user_location.coords.latitude},${user_location.coords.longitude}?units=ca&exclude=[minutely,alerts,flags,hourly]`;
+            let url = DARK_SKY + `${user_location.coords.latitude},${user_location.coords.longitude}?units=ca&exclude=[minutely,alerts,flags]`;
             return AJAX(url)
                 .then((data) => {
                     current_weather = data;
                     console.log('Dark Sky Data', current_weather);
                     
                     updateHeader();
+                    displayHourlyForecast(current_weather.hourly.data)
                 })
                 .catch(e => console.error('Dark Sky Fetch', e))
         })
