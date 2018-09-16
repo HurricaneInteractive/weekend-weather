@@ -41,12 +41,17 @@ var AJAX = function (url) {
         document.body.appendChild(script);
     });
 };
-var FtoC = function (f) { return Math.round((f - 32) * 0.5556).toString(); };
-var CtoF = function (c) { return Math.round((c * 1.8) + 32).toString(); };
 var createElement = function (dom_string) {
     var template = document.createElement('template');
     template.innerHTML = dom_string.trim();
     return template.content.firstChild;
+};
+var formatTime = function (time, timezone) {
+    if (typeof timezone === 'undefined' && current_weather !== null) {
+        timezone = current_weather.timezone;
+    }
+    var date = new Date(time * 1000), curtime = date.toLocaleTimeString('en-GB', { timeZone: timezone }), hour = curtime.match(/(^\d{2})/gm);
+    return "" + curtime.replace(/(:\d{2}$)/gm, '') + (hour && parseInt(hour[0]) >= 12 ? 'pm' : 'am');
 };
 var getUserLocation = function (usr_pos) {
     if (navigator.geolocation && usr_pos === null) {
@@ -76,7 +81,7 @@ var updateHeader = function () {
         }
     }
     if (temp && current_weather) {
-        temp.innerHTML = Math.round(current_weather.currently.temperature).toString();
+        temp.innerHTML = Math.round(current_weather.currently.apparentTemperature).toString();
     }
 };
 var updateApplicationUsername = function () {
@@ -112,16 +117,14 @@ var updateUserCity = function (city) {
     }
 };
 var updateDatetime = function () {
-    var time = currentDate.toLocaleTimeString('en-GB', { timeZone: current_weather.timezone }).replace(/(:\d{2}$)/gm, ''), hour = time.match(/(^\d{2})/gm), options = {
+    var options = {
         timeZone: current_weather.timezone,
         day: 'numeric',
         month: 'short'
     }, date = currentDate.toLocaleDateString('en-GB', options);
-    if (time && hour) {
-        var datetimeDOM = document.querySelector('p[data-datetime]');
-        if (datetimeDOM) {
-            datetimeDOM.innerHTML = date + " " + currentDate.getFullYear() + " // " + time.trim() + (hour && parseInt(hour[0]) >= 12 ? 'PM' : 'AM');
-        }
+    var datetimeDOM = document.querySelector('p[data-datetime]');
+    if (datetimeDOM) {
+        datetimeDOM.innerHTML = date + " " + currentDate.getFullYear() + " // " + formatTime(Date.now() / 1000, current_weather.timezone);
     }
 };
 var getDayString = function (index) {
@@ -144,11 +147,10 @@ var dailyWeatherData = function (items) {
     return "<div class=\"box\">" + box_items.join('') + "</div>";
 };
 var weekendTemplate = function (data, timezone) {
-    var sunrise = new Date(data.sunriseTime * 1000), sunset = new Date(data.sunsetTime * 1000), sunriseTime = sunrise.toLocaleTimeString('en-GB', { timeZone: timezone }).replace(/(:\d{2}$)/gm, ''), sunsetTime = sunset.toLocaleTimeString('en-GB', { timeZone: timezone }).replace(/(:\d{2}$)/gm, ''), sunriseHour = sunriseTime.match(/(^\d{2})/gm), sunsetHour = sunsetTime.match(/(^\d{2})/gm);
     var boxes = [
         [
-            { icon: 'sunrise', label: 'sunrise', value: "" + sunriseTime + (sunriseHour && parseInt(sunriseHour[0]) >= 12 ? 'pm' : 'am') },
-            { icon: 'sunset', label: 'sunset', value: "" + sunsetTime + (sunsetHour && parseInt(sunsetHour[0]) >= 12 ? 'pm' : 'am') }
+            { icon: 'sunrise', label: 'sunrise', value: "" + formatTime(data.sunriseTime, timezone) },
+            { icon: 'sunset', label: 'sunset', value: "" + formatTime(data.sunsetTime, timezone) }
         ],
         [
             { icon: 'wind-dir', label: 'wind', value: Math.floor(data.windSpeed) + "km/h", deg: data.windBearing },
@@ -211,9 +213,7 @@ var getDateISOFormat = function (time, timezone) {
 };
 var displayHourlyForecast = function (data, timezone) {
     var hourly = data.map(function (item) {
-        var date = new Date(item.time * 1000), time = date.toLocaleTimeString('en-GB', { timeZone: timezone }), hour = date.getHours();
-        time = time.replace(/(:\d{2}$)/gm, '');
-        return "\n            <div class=\"box\">\n                <div class=\"box-item\">\n                    " + getIcon(item.icon) + "\n                    <div class=\"data\">\n                        <span class=\"label\">" + time + (hour >= 12 ? 'pm' : 'am') + "</span>\n                        <p>" + Math.floor(item.apparentTemperature) + "&deg;</p>\n                    </div>\n                </div>\n            </div>\n        ";
+        return "\n            <div class=\"box\">\n                <div class=\"box-item\">\n                    " + getIcon(item.icon) + "\n                    <div class=\"data\">\n                        <span class=\"label\">" + formatTime(item.time, timezone) + "</span>\n                        <p>" + Math.floor(item.apparentTemperature) + "&deg;</p>\n                    </div>\n                </div>\n            </div>\n        ";
     });
     var hourly_dom = createElement("<div class=\"hourly-wrapper\">" + hourly.join('') + "</div>");
     if (hourly_wrapper && hourly_dom) {

@@ -83,13 +83,22 @@ const AJAX = (url: string) => {
     });
 }
 
-const FtoC = (f: number) => Math.round( (f - 32) * 0.5556 ).toString()
-const CtoF = (c: number) => Math.round( (c * 1.8) + 32 ).toString()
-
 const createElement = (dom_string: string) => {
     let template = document.createElement('template')
     template.innerHTML = dom_string.trim()
     return template.content.firstChild
+}
+
+const formatTime = (time: number, timezone?: string) => {
+    if (typeof timezone === 'undefined' && current_weather !== null) {
+        timezone = current_weather.timezone
+    }
+
+    let date = new Date(time * 1000),
+        curtime = date.toLocaleTimeString('en-GB', { timeZone: timezone }),
+        hour = curtime.match(/(^\d{2})/gm)
+
+    return `${curtime.replace(/(:\d{2}$)/gm, '')}${ hour && parseInt(hour[0]) >= 12 ? 'pm' : 'am' }`
 }
 
 const getUserLocation = (usr_pos: string|null) => {
@@ -130,7 +139,7 @@ const updateHeader = () => {
     }
 
     if (temp && current_weather) {
-        temp.innerHTML = Math.round(current_weather.currently.temperature).toString();
+        temp.innerHTML = Math.round(current_weather.currently.apparentTemperature).toString();
     }
 }
 
@@ -175,20 +184,16 @@ const updateUserCity = (city: string) => {
 }
 
 const updateDatetime = () => {
-    let time = currentDate.toLocaleTimeString('en-GB', { timeZone: current_weather.timezone }).replace(/(:\d{2}$)/gm, ''),
-        hour = time.match(/(^\d{2})/gm),
-        options = {
+    let options = {
             timeZone: current_weather.timezone,
             day: 'numeric',
             month: 'short'
         },
         date = currentDate.toLocaleDateString('en-GB', options)
 
-    if (time && hour) {
-        let datetimeDOM = document.querySelector('p[data-datetime]')
-        if (datetimeDOM) {
-            datetimeDOM.innerHTML = `${date} ${currentDate.getFullYear()} // ${time.trim()}${ hour && parseInt(hour[0]) >= 12 ? 'PM' : 'AM' }`
-        }
+    let datetimeDOM = document.querySelector('p[data-datetime]')
+    if (datetimeDOM) {
+        datetimeDOM.innerHTML = `${date} ${currentDate.getFullYear()} // ${ formatTime(Date.now() / 1000, current_weather.timezone) }`
     }
 }
 
@@ -232,17 +237,10 @@ const dailyWeatherData = (items: Array<DailyWeather>) => {
 }
 
 const weekendTemplate = (data: any, timezone: string) => {
-    let sunrise = new Date(data.sunriseTime * 1000),
-        sunset = new Date(data.sunsetTime * 1000),
-        sunriseTime = sunrise.toLocaleTimeString('en-GB', { timeZone: timezone }).replace(/(:\d{2}$)/gm, ''),
-        sunsetTime = sunset.toLocaleTimeString('en-GB', { timeZone: timezone }).replace(/(:\d{2}$)/gm, ''),
-        sunriseHour = sunriseTime.match(/(^\d{2})/gm),
-        sunsetHour = sunsetTime.match(/(^\d{2})/gm)
-
     let boxes = [
         [
-            { icon: 'sunrise', label: 'sunrise', value: `${sunriseTime}${ sunriseHour && parseInt(sunriseHour[0]) >= 12 ? 'pm' : 'am' }` },
-            { icon: 'sunset', label: 'sunset', value: `${sunsetTime}${ sunsetHour && parseInt(sunsetHour[0]) >= 12 ? 'pm' : 'am' }` }
+            { icon: 'sunrise', label: 'sunrise', value: `${ formatTime(data.sunriseTime, timezone) }` },
+            { icon: 'sunset', label: 'sunset', value: `${ formatTime(data.sunsetTime, timezone) }` }
         ],
         [
             { icon: 'wind-dir', label: 'wind', value: `${Math.floor(data.windSpeed)}km/h`, deg: data.windBearing },
@@ -358,17 +356,12 @@ const getDateISOFormat = (time: number, timezone: string) => {
 
 const displayHourlyForecast = (data: any, timezone: string) => {
     let hourly = data.map((item: any) => {
-        let date = new Date(item.time * 1000),
-            time = date.toLocaleTimeString('en-GB', { timeZone: timezone }),
-            hour = date.getHours()
-        time = time.replace(/(:\d{2}$)/gm, '');
-
         return `
             <div class="box">
                 <div class="box-item">
                     ${getIcon(item.icon)}
                     <div class="data">
-                        <span class="label">${time}${ hour >= 12 ? 'pm' : 'am' }</span>
+                        <span class="label">${ formatTime(item.time, timezone) }</span>
                         <p>${Math.floor(item.apparentTemperature)}&deg;</p>
                     </div>
                 </div>
