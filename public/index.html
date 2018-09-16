@@ -66,7 +66,7 @@
         </header>
 
         <main>
-            <div id="app">
+            <div id="app" class="page">
                 <div class="container">
                     <h2 data-name="false" class="welcome-msg">
                         Welcome back,<br><span class="c-orange">Adriaan</span>
@@ -78,7 +78,7 @@
                     <div class="app-options">
                         <div class="option">
                             <div id="hourly-info">
-                                <span class="label">24hr Forecast</span>
+                                <span class="label">48hr Forecast</span>
                             </div>
                         </div>
                         <div class="option">
@@ -97,12 +97,58 @@
                 </div>
             </div>
 
-            <div id="page--weekend-planner"></div>
+            <div id="page--weekend-planner" class="page"></div>
+            
+            <div id="location-selection" class="page">
+                <div class="container">
+                    <input type="text" name="location" id="location" placeholder="Canberra" />
+                    <div id="results"></div>
+                    <div class="search-loading">
+                        <svg width="44" height="44" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" stroke="#7161EF">
+                            <g fill="none" fill-rule="evenodd" stroke-width="2">
+                                <circle cx="22" cy="22" r="1">
+                                    <animate attributeName="r"
+                                        begin="0s" dur="1.8s"
+                                        values="1; 20"
+                                        calcMode="spline"
+                                        keyTimes="0; 1"
+                                        keySplines="0.165, 0.84, 0.44, 1"
+                                        repeatCount="indefinite" />
+                                    <animate attributeName="stroke-opacity"
+                                        begin="0s" dur="1.8s"
+                                        values="1; 0"
+                                        calcMode="spline"
+                                        keyTimes="0; 1"
+                                        keySplines="0.3, 0.61, 0.355, 1"
+                                        repeatCount="indefinite" />
+                                </circle>
+                                <circle cx="22" cy="22" r="1">
+                                    <animate attributeName="r"
+                                        begin="-0.9s" dur="1.8s"
+                                        values="1; 20"
+                                        calcMode="spline"
+                                        keyTimes="0; 1"
+                                        keySplines="0.165, 0.84, 0.44, 1"
+                                        repeatCount="indefinite" />
+                                    <animate attributeName="stroke-opacity"
+                                        begin="-0.9s" dur="1.8s"
+                                        values="1; 0"
+                                        calcMode="spline"
+                                        keyTimes="0; 1"
+                                        keySplines="0.3, 0.61, 0.355, 1"
+                                        repeatCount="indefinite" />
+                                </circle>
+                            </g>
+                        </svg>
+                        <p class="label">Loading</p>
+                    </div>
+                </div>
+            </div>
         </main>
 
         <footer>
             <div class="container">
-                <p>Powered by <a href="https://darksky.net/" target="_blank" rel="noopener noreferrer">Dark Sky</a></p>
+                <p>Powered by <a href="https://darksky.net/" target="_blank" rel="noopener noreferrer">Dark Sky</a> & <a href="https://www.mapbox.com/" target="_blank" rel="noopener noreferrer">Mapbox</a></p>
             </div>
         </footer>
 
