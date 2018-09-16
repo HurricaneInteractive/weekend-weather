@@ -175,19 +175,19 @@ const updateUserCity = (city: string) => {
 }
 
 const updateDatetime = () => {
-    let dateString = currentDate.toDateString(),
-        time = currentDate.toLocaleTimeString('en-GB'),
-        year = dateString.match(/\d{4}/gm),
-        day = dateString.match(/(\d{1,2}\s)/gm),
-        month = dateString.match(/\s(\D{3})\s/gm),
-        hour = currentDate.getHours()
+    let time = currentDate.toLocaleTimeString('en-GB', { timeZone: current_weather.timezone }).replace(/(:\d{2}$)/gm, ''),
+        hour = time.match(/(^\d{2})/gm),
+        options = {
+            timeZone: current_weather.timezone,
+            day: 'numeric',
+            month: 'short'
+        },
+        date = currentDate.toLocaleDateString('en-GB', options)
 
-    time = time.replace(/(:\d{2}$)/gm, '')
-
-    if (year && day && month && time && hour) {
+    if (time && hour) {
         let datetimeDOM = document.querySelector('p[data-datetime]')
         if (datetimeDOM) {
-            datetimeDOM.innerHTML = `${day[0].trim()} ${month[0].trim()} ${year[0].trim()} // ${time.trim()}${ hour >= 12 ? 'PM' : 'AM' }`
+            datetimeDOM.innerHTML = `${date} ${currentDate.getFullYear()} // ${time.trim()}${ hour && parseInt(hour[0]) >= 12 ? 'PM' : 'AM' }`
         }
     }
 }
@@ -356,10 +356,10 @@ const getDateISOFormat = (time: number, timezone: string) => {
     }
 }
 
-const displayHourlyForecast = (data: any) => {
+const displayHourlyForecast = (data: any, timezone: string) => {
     let hourly = data.map((item: any) => {
         let date = new Date(item.time * 1000),
-            time = date.toLocaleTimeString('en-GB'),
+            time = date.toLocaleTimeString('en-GB', { timeZone: timezone }),
             hour = date.getHours()
         time = time.replace(/(:\d{2}$)/gm, '');
 
@@ -451,7 +451,6 @@ const setupApp = () => new Promise(resolve => {
 
     updateApplicationUsername();
     getUserLocationCity();
-    updateDatetime();
 
     user_location = session_storage.getItem(KEY_LOCATION)
 
@@ -500,7 +499,8 @@ const setupApp = () => new Promise(resolve => {
                     console.log('Dark Sky Data', current_weather);
                     
                     updateHeader();
-                    displayHourlyForecast(current_weather.hourly.data)
+                    updateDatetime();
+                    displayHourlyForecast(current_weather.hourly.data, current_weather.timezone)
                 })
                 .catch(e => console.error('Dark Sky Fetch', e))
         })

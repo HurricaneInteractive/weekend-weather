@@ -112,12 +112,15 @@ var updateUserCity = function (city) {
     }
 };
 var updateDatetime = function () {
-    var dateString = currentDate.toDateString(), time = currentDate.toLocaleTimeString('en-GB'), year = dateString.match(/\d{4}/gm), day = dateString.match(/(\d{1,2}\s)/gm), month = dateString.match(/\s(\D{3})\s/gm), hour = currentDate.getHours();
-    time = time.replace(/(:\d{2}$)/gm, '');
-    if (year && day && month && time && hour) {
+    var time = currentDate.toLocaleTimeString('en-GB', { timeZone: current_weather.timezone }).replace(/(:\d{2}$)/gm, ''), hour = time.match(/(^\d{2})/gm), options = {
+        timeZone: current_weather.timezone,
+        day: 'numeric',
+        month: 'short'
+    }, date = currentDate.toLocaleDateString('en-GB', options);
+    if (time && hour) {
         var datetimeDOM = document.querySelector('p[data-datetime]');
         if (datetimeDOM) {
-            datetimeDOM.innerHTML = day[0].trim() + " " + month[0].trim() + " " + year[0].trim() + " // " + time.trim() + (hour >= 12 ? 'PM' : 'AM');
+            datetimeDOM.innerHTML = date + " " + currentDate.getFullYear() + " // " + time.trim() + (hour && parseInt(hour[0]) >= 12 ? 'PM' : 'AM');
         }
     }
 };
@@ -206,9 +209,9 @@ var getDateISOFormat = function (time, timezone) {
         return date.getFullYear() + "-" + month + "-" + day[0].trim() + "T" + date.toLocaleTimeString('en-GB', { timeZone: timezone });
     }
 };
-var displayHourlyForecast = function (data) {
+var displayHourlyForecast = function (data, timezone) {
     var hourly = data.map(function (item) {
-        var date = new Date(item.time * 1000), time = date.toLocaleTimeString('en-GB'), hour = date.getHours();
+        var date = new Date(item.time * 1000), time = date.toLocaleTimeString('en-GB', { timeZone: timezone }), hour = date.getHours();
         time = time.replace(/(:\d{2}$)/gm, '');
         return "\n            <div class=\"box\">\n                <div class=\"box-item\">\n                    " + getIcon(item.icon) + "\n                    <div class=\"data\">\n                        <span class=\"label\">" + time + (hour >= 12 ? 'pm' : 'am') + "</span>\n                        <p>" + Math.floor(item.apparentTemperature) + "&deg;</p>\n                    </div>\n                </div>\n            </div>\n        ";
     });
@@ -277,7 +280,6 @@ var displaySearchResults = function (data) {
 var setupApp = function () { return new Promise(function (resolve) {
     updateApplicationUsername();
     getUserLocationCity();
-    updateDatetime();
     user_location = session_storage.getItem(KEY_LOCATION);
     getUserLocation(user_location)
         .then(function (position) {
@@ -321,7 +323,8 @@ var setupApp = function () { return new Promise(function (resolve) {
             current_weather = data;
             console.log('Dark Sky Data', current_weather);
             updateHeader();
-            displayHourlyForecast(current_weather.hourly.data);
+            updateDatetime();
+            displayHourlyForecast(current_weather.hourly.data, current_weather.timezone);
         })["catch"](function (e) { return console.error('Dark Sky Fetch', e); });
     })["catch"](function (e) { return console.error('Dark Sky', e); })
         .then(function () {
@@ -386,8 +389,8 @@ setupApp()
             }, autocomplete_buffer);
         });
     }
-    var end_date_range = getDateISOFormat(weekend_weather[1].time);
-    var start_date_range = getDateISOFormat(weekend_weather[0].time);
+    var end_date_range = getDateISOFormat(weekend_weather[1].time, current_weather.timezone);
+    var start_date_range = getDateISOFormat(weekend_weather[0].time, current_weather.timezone);
     var meetupURL = MEETUP + "&lon=" + user_location.coords.longitude + "&lat=" + user_location.coords.latitude + "&radius=10&page=50&topic_category=15892&end_date_range=" + end_date_range + "&start_date_range=" + start_date_range;
     AJAX(meetupURL)
         .then(function (data) {
