@@ -21,7 +21,7 @@ var icons = {
 };
 var getIcon = function (icon) { return icons[icon]; };
 var KEY_USERNAME = 'username', KEY_LOCATION = 'location', KEY_CITY = 'city', API_KEY = 'a11c099d3dfac008f325d806a2e8e43f', MAPBOX_KEY = 'pk.eyJ1IjoidGhlLXR1cnRsZSIsImEiOiJjamxkOXVlajgwOTN4M3FwaDFjbHRtMTZ6In0.7XM2WPENWe5p0PLeSoBc2Q', DARK_SKY = "https://api.darksky.net/forecast/" + API_KEY + "/", MAPBOX = 'https://api.mapbox.com', MEETUP = 'https://api.meetup.com/find/upcoming_events?&sign=true&key=73a5379b4f15491cd4b6be472161&photo-host=public';
-var local_storage = window.localStorage, session_storage = window.sessionStorage, username = null, user_location = null, user_city = null, location_available = true, currentDate = new Date(), current_weather = null, loader = document.getElementById('loading'), personal_name_input = document.getElementById('personal-name'), personal_name_save = document.getElementById('save-name'), welcome_message = document.querySelector('#app .welcome-msg'), weekend_page = document.getElementById('page--weekend-planner'), app = document.getElementById('app'), body = document.body, hourly_wrapper = document.getElementById('hourly-info');
+var local_storage = window.localStorage, session_storage = window.sessionStorage, username = null, user_location = null, user_city = null, location_available = true, currentDate = new Date(), current_weather = null, loader = document.getElementById('loading'), personal_name_input = document.getElementById('personal-name'), personal_name_save = document.getElementById('save-name'), welcome_message = document.querySelector('#app .welcome-msg'), weekend_page = document.getElementById('page--weekend-planner'), app = document.getElementById('app'), body = document.body, hourly_wrapper = document.getElementById('hourly-info'), cityDOM = document.querySelector('p[data-city]'), location_selection = document.getElementById('location-selection'), location_search = document.getElementById('location'), autocomplete_buffer = 1000, search_results = document.getElementById('results');
 // Overcome CORS on localhost
 var AJAX = function (url) {
     return new Promise(function (resolve, reject) {
@@ -107,7 +107,6 @@ var getUserLocationCity = function () {
     }
 };
 var updateUserCity = function (city) {
-    var cityDOM = document.querySelector('p[data-city]');
     if (cityDOM !== null) {
         cityDOM.innerHTML = city;
     }
@@ -141,12 +140,12 @@ var dailyWeatherData = function (items) {
     var box_items = items.map(function (item) { return ("\n            <div class=\"box-item\">\n                " + (typeof item.deg !== 'undefined' ? "<span style=\"transform: rotate(" + item.deg + "deg);\">" : '') + "\n                    " + getIcon(item.icon) + "\n                " + (typeof item.deg !== 'undefined' ? '</span>' : '') + "\n                <div class=\"data\">\n                    <span class=\"label\">" + item.label + "</span>\n                    <p>" + item.value + "</p>\n                </div>\n            </div>\n        "); });
     return "<div class=\"box\">" + box_items.join('') + "</div>";
 };
-var weekendTemplate = function (data) {
-    var sunrise = new Date(data.sunriseTime * 1000), sunset = new Date(data.sunsetTime * 1000), sunriseMinutes = sunrise.getMinutes() < 10 ? "0" + sunrise.getMinutes() : sunrise.getMinutes(), sunsetMinutes = sunset.getMinutes() < 10 ? "0" + sunset.getMinutes() : sunset.getMinutes(), sunriseHour = sunrise.getHours(), sunsetHour = sunset.getHours();
+var weekendTemplate = function (data, timezone) {
+    var sunrise = new Date(data.sunriseTime * 1000), sunset = new Date(data.sunsetTime * 1000), sunriseTime = sunrise.toLocaleTimeString('en-GB', { timeZone: timezone }).replace(/(:\d{2}$)/gm, ''), sunsetTime = sunset.toLocaleTimeString('en-GB', { timeZone: timezone }).replace(/(:\d{2}$)/gm, ''), sunriseHour = sunriseTime.match(/(^\d{2})/gm), sunsetHour = sunsetTime.match(/(^\d{2})/gm);
     var boxes = [
         [
-            { icon: 'sunrise', label: 'sunrise', value: sunriseHour + ":" + sunriseMinutes + (sunriseHour >= 12 ? 'pm' : 'am') },
-            { icon: 'sunset', label: 'sunset', value: sunsetHour + ":" + sunsetMinutes + (sunsetHour >= 12 ? 'pm' : 'am') }
+            { icon: 'sunrise', label: 'sunrise', value: "" + sunriseTime + (sunriseHour && parseInt(sunriseHour[0]) >= 12 ? 'pm' : 'am') },
+            { icon: 'sunset', label: 'sunset', value: "" + sunsetTime + (sunsetHour && parseInt(sunsetHour[0]) >= 12 ? 'pm' : 'am') }
         ],
         [
             { icon: 'wind-dir', label: 'wind', value: Math.floor(data.windSpeed) + "km/h", deg: data.windBearing },
@@ -169,8 +168,8 @@ var weekendTemplate = function (data) {
     var elemString = "\n        <div class=\"forecast-section\">\n            <h2>" + data.day + "<br><span class=\"c-orange\">" + Math.floor(data.apparentTemperatureHigh) + "&deg;</span></h2>\n            <div class=\"box-wrapper\">\n                " + boxesDomString.join('') + "\n            </div>\n        </div>\n    ";
     return elemString;
 };
-var populateWeekendPage = function (data) {
-    var forecastDOM = data.map(function (item) { return weekendTemplate(item); }), forecastElem = createElement('<div class="forecast-wrapper container">' + forecastDOM.join('') + '</div>');
+var populateWeekendPage = function (data, timezone) {
+    var forecastDOM = data.map(function (item) { return weekendTemplate(item, timezone); }), forecastElem = createElement('<div class="forecast-wrapper container">' + forecastDOM.join('') + '</div>');
     if (weekend_page !== null && forecastElem !== null) {
         weekend_page.appendChild(forecastElem);
         var box_stats_1 = weekend_page.querySelectorAll('.forecast-section .box-wrapper .box.stats');
@@ -201,10 +200,10 @@ var populateMeetup = function (data) {
     }
     return createElement("\n        <div class=\"meetup-section\">\n            <h2>Meetups</h2>\n            <div class=\"meetup-listing\">\n                " + meetupDOM.join('') + "\n            </div>\n        </div>\n    ");
 };
-var getDateISOFormat = function (time) {
+var getDateISOFormat = function (time, timezone) {
     var date = new Date(time * 1000), day = date.toDateString().match(/(\d{1,2}\s)/gm), month = (date.getMonth() + 1) < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
     if (day && month) {
-        return date.getFullYear() + "-" + month + "-" + day[0].trim() + "T" + date.toLocaleTimeString('en-GB');
+        return date.getFullYear() + "-" + month + "-" + day[0].trim() + "T" + date.toLocaleTimeString('en-GB', { timeZone: timezone });
     }
 };
 var displayHourlyForecast = function (data) {
@@ -218,6 +217,63 @@ var displayHourlyForecast = function (data) {
         hourly_wrapper.appendChild(hourly_dom);
     }
 };
+var changePage = function (page, classList, callback) {
+    if (callback === void 0) { callback = null; }
+    if (page) {
+        page.addEventListener('click', function (e) {
+            var _a, _b;
+            e.preventDefault();
+            if (body) {
+                window.scrollTo(0, 0);
+                if (typeof classList.add !== 'undefined') {
+                    (_a = body.classList).add.apply(_a, classList.add.split(' '));
+                }
+                if (typeof classList.remove !== 'undefined') {
+                    (_b = body.classList).remove.apply(_b, classList.remove.split(' '));
+                }
+                if (callback) {
+                    callback();
+                }
+            }
+        });
+    }
+};
+var updateApplicationData = function (location, city) {
+    user_location = location;
+    session_storage.setItem(KEY_LOCATION, JSON.stringify(user_location));
+    updateUserCity(city);
+    session_storage.setItem(KEY_CITY, city);
+    window.location.href = "/";
+};
+var displaySearchResults = function (data) {
+    var list = data.map(function (item) { return ("\n            <li data-lng=\"" + item.center[0] + "\" data-lat=\"" + item.center[1] + "\" data-city=\"" + item.text + "\">" + item.place_name + "</li>\n        "); });
+    if (list.length === 0) {
+        list.push("<p class=\"label\">No Results Found</p>");
+    }
+    var resultsDOM = createElement("<ul class=\"search-results\">" + list.join('') + "</ul>");
+    if (search_results && resultsDOM) {
+        search_results.innerHTML = '';
+        search_results.appendChild(resultsDOM);
+        var search_items_1 = search_results.querySelectorAll('li');
+        if (search_items_1) {
+            var _loop_2 = function (i) {
+                search_items_1[i].addEventListener('click', function (e) {
+                    e.preventDefault();
+                    var location_data = {
+                        "coords": {
+                            "latitude": search_items_1[i].getAttribute('data-lat'),
+                            "longitude": search_items_1[i].getAttribute('data-lng')
+                        }
+                    };
+                    updateApplicationData(location_data, search_items_1[i].getAttribute('data-city') || '');
+                });
+            };
+            for (var i = 0; i < search_items_1.length; i++) {
+                _loop_2(i);
+            }
+        }
+    }
+};
 var setupApp = function () { return new Promise(function (resolve) {
     updateApplicationUsername();
     getUserLocationCity();
@@ -226,8 +282,12 @@ var setupApp = function () { return new Promise(function (resolve) {
     getUserLocation(user_location)
         .then(function (position) {
         if (typeof position.coords === 'undefined') {
-            user_location = null;
-            location_available = false;
+            user_location = {
+                "coords": {
+                    "latitude": -35.2384096,
+                    "longitude": 149.083832
+                }
+            };
         }
         else {
             user_location = {
@@ -245,6 +305,7 @@ var setupApp = function () { return new Promise(function (resolve) {
             return fetch(url)
                 .then(function (res) { return res.json(); })
                 .then(function (data) {
+                console.log('map', data);
                 updateUserCity(data.features[0].text);
                 session_storage.setItem(KEY_CITY, data.features[0].text);
             })["catch"](function (e) { return console.error(e); });
@@ -278,23 +339,51 @@ setupApp()
         });
     }
     var weekend_weather = getUpcomingWeekendWeather(current_weather.daily.data), back_arrow = document.querySelector('.appbar .details .feather.back-arrow'), weekend_card = document.querySelector('#app .app-options .option .card.weekend-planner');
-    populateWeekendPage(weekend_weather);
-    if (weekend_card) {
-        weekend_card.addEventListener('click', function (e) {
-            e.preventDefault();
-            if (body) {
-                window.scrollTo(0, 0);
-                body.classList.add('weekend-open');
+    populateWeekendPage(weekend_weather, current_weather.timezone);
+    changePage(weekend_card, {
+        add: 'weekend-open'
+    });
+    changePage(back_arrow, {
+        remove: 'weekend-open location-selection-open'
+    }, function () {
+        if (location_search) {
+            location_search.value = '';
+            if (search_results) {
+                search_results.innerHTML = '';
             }
+        }
+    });
+    changePage(cityDOM, {
+        add: 'location-selection-open',
+        remove: 'weekend-open'
+    });
+    if (location_search) {
+        var autocomplete_timer_1 = null;
+        location_search.addEventListener('keydown', function (e) {
+            clearTimeout(autocomplete_timer_1);
         });
-    }
-    if (back_arrow) {
-        back_arrow.addEventListener('click', function (e) {
-            e.preventDefault();
-            if (body) {
-                window.scrollTo(0, 0);
-                body.classList.remove('weekend-open');
+        location_search.addEventListener('input', function (e) {
+            if (e.target.value === '') {
+                if (search_results) {
+                    search_results.innerHTML = '';
+                }
             }
+            if (e.target.value === '' || e.target.value.length < 3)
+                return false;
+            autocomplete_timer_1 = setTimeout(function () {
+                if (location_selection) {
+                    location_selection.classList.add('loading');
+                }
+                var url = MAPBOX + "/geocoding/v5/mapbox.places/" + encodeURIComponent(e.target.value) + ".json?access_token=" + MAPBOX_KEY + "&place_type=[place,country,region]";
+                fetch(url)
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                    if (location_selection) {
+                        location_selection.classList.remove('loading');
+                    }
+                    displaySearchResults(data.features);
+                })["catch"](function (e) { return console.error('Search error', e); });
+            }, autocomplete_buffer);
         });
     }
     var end_date_range = getDateISOFormat(weekend_weather[1].time);
