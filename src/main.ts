@@ -167,7 +167,7 @@ const updateUserCity = (city: string) => {
 
 const updateDatetime = () => {
     let dateString = currentDate.toDateString(),
-        time = currentDate.toLocaleTimeString(),
+        time = currentDate.toLocaleTimeString('en-GB'),
         year = dateString.match(/\d{4}/gm),
         day = dateString.match(/(\d{1,2}\s)/gm),
         month = dateString.match(/\s(\D{3})\s/gm),
@@ -343,14 +343,14 @@ const getDateISOFormat = (time: number) => {
         month = (date.getMonth() + 1) < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1
 
     if (day && month) {
-        return `${date.getFullYear()}-${month}-${day[0].trim()}T${date.toLocaleTimeString()}`
+        return `${date.getFullYear()}-${month}-${day[0].trim()}T${date.toLocaleTimeString('en-GB')}`
     }
 }
 
 const displayHourlyForecast = (data: any) => {
     let hourly = data.map((item: any) => {
         let date = new Date(item.time * 1000),
-            time = date.toLocaleTimeString(),
+            time = date.toLocaleTimeString('en-GB'),
             hour = date.getHours()
         time = time.replace(/(:\d{2}$)/gm, '');
 

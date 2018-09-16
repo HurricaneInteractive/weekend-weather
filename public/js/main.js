@@ -113,7 +113,7 @@ var updateUserCity = function (city) {
     }
 };
 var updateDatetime = function () {
-    var dateString = currentDate.toDateString(), time = currentDate.toLocaleTimeString(), year = dateString.match(/\d{4}/gm), day = dateString.match(/(\d{1,2}\s)/gm), month = dateString.match(/\s(\D{3})\s/gm), hour = currentDate.getHours();
+    var dateString = currentDate.toDateString(), time = currentDate.toLocaleTimeString('en-GB'), year = dateString.match(/\d{4}/gm), day = dateString.match(/(\d{1,2}\s)/gm), month = dateString.match(/\s(\D{3})\s/gm), hour = currentDate.getHours();
     time = time.replace(/(:\d{2}$)/gm, '');
     if (year && day && month && time && hour) {
         var datetimeDOM = document.querySelector('p[data-datetime]');
@@ -204,12 +204,12 @@ var populateMeetup = function (data) {
 var getDateISOFormat = function (time) {
     var date = new Date(time * 1000), day = date.toDateString().match(/(\d{1,2}\s)/gm), month = (date.getMonth() + 1) < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1;
     if (day && month) {
-        return date.getFullYear() + "-" + month + "-" + day[0].trim() + "T" + date.toLocaleTimeString();
+        return date.getFullYear() + "-" + month + "-" + day[0].trim() + "T" + date.toLocaleTimeString('en-GB');
     }
 };
 var displayHourlyForecast = function (data) {
     var hourly = data.map(function (item) {
-        var date = new Date(item.time * 1000), time = date.toLocaleTimeString(), hour = date.getHours();
+        var date = new Date(item.time * 1000), time = date.toLocaleTimeString('en-GB'), hour = date.getHours();
         time = time.replace(/(:\d{2}$)/gm, '');
         return "\n            <div class=\"box\">\n                <div class=\"box-item\">\n                    " + getIcon(item.icon) + "\n                    <div class=\"data\">\n                        <span class=\"label\">" + time + (hour >= 12 ? 'pm' : 'am') + "</span>\n                        <p>" + Math.floor(item.apparentTemperature) + "&deg;</p>\n                    </div>\n                </div>\n            </div>\n        ";
     });
