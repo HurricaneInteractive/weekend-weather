@@ -1,15 +1,28 @@
+/**
+ * Defines an interface for the daily weather card
+ *
+ * @interface DailyWeather
+ */
 interface DailyWeather {
     icon: string,
     label: string,
     value: string,
     deg?: number
-}
+};
 
+/**
+ * Defines an interface for the change page function
+ *
+ * @interface ClassList
+ */
 interface ClassList {
     add?: string,
     remove?: string
-}
+};
 
+/**
+ * define icons code
+ */
 const icons: any = {
     "clear-night": `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-moon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`,
     "clear-day": `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`,
@@ -31,8 +44,14 @@ const icons: any = {
     "arrow-down": `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down"><polyline points="6 9 12 15 18 9"></polyline></svg>`
 };
 
-const getIcon = (icon: string) => icons[icon]
+/**
+ * Gets a icon svg code based on a key
+ * 
+ * @param {string} icon - icon key
+ */
+const getIcon = (icon: string) => icons[icon];
 
+// Define web app constants
 const KEY_USERNAME: string = 'username',
     KEY_LOCATION: string = 'location',
     KEY_CITY: string = 'city',
@@ -40,8 +59,9 @@ const KEY_USERNAME: string = 'username',
     MAPBOX_KEY: string = 'pk.eyJ1IjoidGhlLXR1cnRsZSIsImEiOiJjamxkOXVlajgwOTN4M3FwaDFjbHRtMTZ6In0.7XM2WPENWe5p0PLeSoBc2Q',
     DARK_SKY: string = `https://api.darksky.net/forecast/${API_KEY}/`,
     MAPBOX: string = 'https://api.mapbox.com',
-    MEETUP: string = 'https://api.meetup.com/find/upcoming_events?&sign=true&key=73a5379b4f15491cd4b6be472161&photo-host=public'
+    MEETUP: string = 'https://api.meetup.com/find/upcoming_events?&sign=true&key=73a5379b4f15491cd4b6be472161&photo-host=public';
 
+// Define web app location variables and elements
 let local_storage: Storage = window.localStorage,
     session_storage: Storage = window.sessionStorage,
     username: string|null = null,
@@ -62,12 +82,16 @@ let local_storage: Storage = window.localStorage,
     location_selection: HTMLElement|null = document.getElementById('location-selection'),
     location_search: any|null = document.getElementById('location'),
     autocomplete_buffer: number = 1000,
-    search_results: HTMLElement|null = document.getElementById('results')
+    search_results: HTMLElement|null = document.getElementById('results');
 
-// Overcome CORS on localhost
+/**
+ * Overcome CORS on localhost
+ * 
+ * @param {string} url - API Endpoint URL
+ */
 const AJAX = (url: string) => {
     return new Promise((resolve, reject) => {
-        let script = document.createElement('script')
+        let script = document.createElement('script');
         const name = "_jsonp_" + Math.round(100000 * Math.random());
         //url formatting
         if (url.match(/\?/)) url += "&callback="+name
@@ -83,40 +107,64 @@ const AJAX = (url: string) => {
     });
 }
 
+/**
+ * Creates a HTML element from a string
+ * 
+ * @param {string} dom_string - string of HTML code
+ */
 const createElement = (dom_string: string) => {
-    let template = document.createElement('template')
-    template.innerHTML = dom_string.trim()
-    return template.content.firstChild
+    let template = document.createElement('template');
+    template.innerHTML = dom_string.trim();
+    return template.content.firstChild;
 }
 
+/**
+ * Format the time to 17:00pm based on epoch number
+ * 
+ * @param {number} time - epoch number
+ * @param {string} timezone - current timezone
+ * 
+ * @return {string} formatted time
+ */
 const formatTime = (time: number, timezone?: string) => {
     if (typeof timezone === 'undefined' && current_weather !== null) {
-        timezone = current_weather.timezone
+        timezone = current_weather.timezone;
     }
 
     let date = new Date(time * 1000),
         curtime = date.toLocaleTimeString('en-GB', { timeZone: timezone }),
-        hour = curtime.match(/(^\d{2})/gm)
+        hour = curtime.match(/(^\d{2})/gm);
 
-    return `${curtime.replace(/(:\d{2}$)/gm, '')}${ hour && parseInt(hour[0]) >= 12 ? 'pm' : 'am' }`
+    return `${curtime.replace(/(:\d{2}$)/gm, '')}${ hour && parseInt(hour[0]) >= 12 ? 'pm' : 'am' }`;
 }
 
+/**
+ * Gets the current users location data
+ * 
+ * @param {string|null} usr_pos - saved user position
+ */
 const getUserLocation = (usr_pos: string|null) => {
+    // gets users permission to get geolocation
     if (navigator.geolocation && usr_pos === null) {
         return new Promise((resolve, reject) => (
             navigator.geolocation.getCurrentPosition(resolve, reject)
-        ))
+        ));
     }
     else {
+        // returns the session storage value
         if (usr_pos !== null) {
-            return new Promise(resolve => resolve(JSON.parse(usr_pos)))
+            return new Promise(resolve => resolve(JSON.parse(usr_pos)));
         }
+        // returns empty object
         else {
-            return new Promise(resolve => resolve({}))
+            return new Promise(resolve => resolve({}));
         }
     }
 }
 
+/**
+ * Updated the header with the current temperature, and weather icon
+ */
 const updateHeader = () => {
     let domDestination = document.querySelector('header.appbar .details .details-icon .back-arrow'),
         temp = document.querySelector('header .temp span');
@@ -125,10 +173,12 @@ const updateHeader = () => {
         let currentSvg = document.querySelector('header.appbar .details .feather.target'),
             parent = domDestination.parentNode;
         if (parent !== null) {
+            // gets the correct icon
             let icon = current_weather.currently.icon,
                 svg_struct = getIcon(icon),
                 svg_dom = createElement(svg_struct);
 
+            // removes any existing icon & inserts the DOM
             if (svg_dom !== null) {
                 if (currentSvg) {
                     currentSvg.remove();
@@ -143,11 +193,15 @@ const updateHeader = () => {
     }
 }
 
+/**
+ * Gets the current users name from local storage and displays it,
+ * if it is found
+ */
 const updateApplicationUsername = () => {
-    username = local_storage.getItem(KEY_USERNAME)
+    username = local_storage.getItem(KEY_USERNAME);
 
     if (username !== null && welcome_message !== null) {
-        welcome_message.setAttribute('data-name', 'true')
+        welcome_message.setAttribute('data-name', 'true');
         let name_span = welcome_message.querySelector('.c-orange');
         
         if (name_span !== null) {
@@ -156,11 +210,17 @@ const updateApplicationUsername = () => {
     }
 }
 
+/**
+ * Saves the users name into local storage and updates the DOM
+ * 
+ * @param {Event} e - click event
+ */
 const saveApplicationUsername = (e: Event) => {
     e.preventDefault();
     if (personal_name_input !== null) {
         let name = personal_name_input.value;
 
+        // Minor error checking
         if (name.trim() === '') {
             alert('Please enter a name');
         }
@@ -170,47 +230,67 @@ const saveApplicationUsername = (e: Event) => {
     }
 }
 
+/**
+ * Gets the users city from session storage
+ * and sets the global variable
+ */
 const getUserLocationCity = () => {
-    let city = session_storage.getItem(KEY_CITY)
+    let city = session_storage.getItem(KEY_CITY);
     if (city !== null && city !== '') {
-        user_city = city
+        user_city = city;
     }
 }
 
+/**
+ * Updates the city DOM with the users city
+ * 
+ * @param {string} city Users city
+ */
 const updateUserCity = (city: string) => {
     if (cityDOM !== null) {
-        cityDOM.innerHTML = city
+        cityDOM.innerHTML = city;
     }
 }
 
+/**
+ * Updates the header date and time based on the users timezone
+ */
 const updateDatetime = () => {
     let options = {
             timeZone: current_weather.timezone,
             day: 'numeric',
             month: 'short'
         },
-        date = currentDate.toLocaleDateString('en-GB', options)
+        date = currentDate.toLocaleDateString('en-GB', options);
 
-    let datetimeDOM = document.querySelector('p[data-datetime]')
+    let datetimeDOM = document.querySelector('p[data-datetime]');
     if (datetimeDOM) {
-        datetimeDOM.innerHTML = `${date} ${currentDate.getFullYear()} // ${ formatTime(Date.now() / 1000, current_weather.timezone) }`
+        datetimeDOM.innerHTML = `${date} ${currentDate.getFullYear()} // ${ formatTime(Date.now() / 1000, current_weather.timezone) }`;
     }
 }
 
+/**
+ * Gets the day as a word based on a index. 0 = Sunday
+ * @param index getDay() return value
+ */
 const getDayString = (index: number) => {
     return ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][index];
 }
 
+/**
+ * Filters through the daily weather and gets the upcoming Saturday and Sundays weather
+ * @param daily - DarkSky return object
+ */
 const getUpcomingWeekendWeather = (daily: Array<object>) => {
     let data = daily.filter((item: any, index: number) => {
         if (index !== 0) {
             let date = new Date(item.time * 1000),
                 day = date.getDay(),
-                dayString = getDayString(day)
+                dayString = getDayString(day);
 
             if (dayString === 'Sunday' || dayString === 'Saturday') {
-                item['day'] = dayString
-                return item
+                item['day'] = dayString;
+                return item;
             }
         }
     })
@@ -218,6 +298,10 @@ const getUpcomingWeekendWeather = (daily: Array<object>) => {
     return data;
 }
 
+/**
+ * Constructs box items for the weekend data
+ * @param {Array<DailyWeather>} items - forecast array
+ */
 const dailyWeatherData = (items: Array<DailyWeather>) => {
     let box_items = items.map(item => (
         `
@@ -231,12 +315,20 @@ const dailyWeatherData = (items: Array<DailyWeather>) => {
                 </div>
             </div>
         `
-    ))
+    ));
 
-    return `<div class="box">${box_items.join('')}</div>`
+    return `<div class="box">${box_items.join('')}</div>`;
 }
 
+/**
+ * Constructs the weekend weather statistics
+ * 
+ * @param data - Weekend day weather details
+ * @param timezone - current users timezone to format time correctly
+ */
 const weekendTemplate = (data: any, timezone: string) => {
+    // create an array holding the box data
+    // Able to add new boxes if needed
     let boxes = [
         [
             { icon: 'sunrise', label: 'sunrise', value: `${ formatTime(data.sunriseTime, timezone) }` },
@@ -250,17 +342,18 @@ const weekendTemplate = (data: any, timezone: string) => {
             { icon: 'droplet', label: 'participation', value: `${Math.floor(data.precipProbability * 100)}%` },
             { icon: 'rain', label: 'type', value: data.precipType || 'none' }
         ]
-    ]
+    ];
 
-    let boxesDomString = boxes.map((box) => dailyWeatherData(box))
+    let boxesDomString = boxes.map((box) => dailyWeatherData(box));
 
+    // Dropdown stats - able to add more if needed
     let stats = [
         { label: 'cloud cover', value: `${Math.floor(data.cloudCover * 100)}%` },
         { label: 'humidity', value: `${Math.floor(data.humidity * 100)}%` },
         { label: 'temp low', value: `${Math.floor(data.temperatureLow)}&deg;` },
         { label: 'temp high', value: `${Math.floor(data.temperatureHigh)}&deg;` },
         { label: 'UV index', value: data.uvIndex }
-    ]
+    ];
 
     boxesDomString.push(
         `
@@ -273,8 +366,9 @@ const weekendTemplate = (data: any, timezone: string) => {
                 </ul>
             </div>
         `
-    )
+    );
 
+    // Constructs the weekend forecast section
     const elemString = `
         <div class="forecast-section">
             <h2>${data.day}<br><span class="c-orange">${Math.floor(data.apparentTemperatureHigh)}&deg;</span></h2>
@@ -282,21 +376,28 @@ const weekendTemplate = (data: any, timezone: string) => {
                 ${boxesDomString.join('')}
             </div>
         </div>
-    `
+    `;
 
     return elemString;
 }
 
+/**
+ * Creates the full DOM for the weather data on the weekend page
+ * 
+ * @param data - Saturday and Sundays weather
+ * @param timezone - current users timezone
+ */
 const populateWeekendPage = (data: Array<object>, timezone: string) => {
     let forecastDOM = data.map(item => weekendTemplate(item, timezone)),
-        forecastElem = createElement( '<div class="forecast-wrapper container">' + forecastDOM.join('') + '</div>' )
+        forecastElem = createElement( '<div class="forecast-wrapper container">' + forecastDOM.join('') + '</div>' );
 
     if (weekend_page !== null && forecastElem !== null) {
-        weekend_page.appendChild(forecastElem)
+        weekend_page.appendChild(forecastElem);
 
         let box_stats = weekend_page.querySelectorAll('.forecast-section .box-wrapper .box.stats');
         if (box_stats) {
             for (let x = 0; x < box_stats.length; x++) {
+                // Binds the dropdown toggle function to the newly created DOM
                 box_stats[x].addEventListener('click', (e) => {
                     e.preventDefault();
                     box_stats[x].classList.toggle('open');
@@ -306,32 +407,43 @@ const populateWeekendPage = (data: Array<object>, timezone: string) => {
     }
 }
 
+/**
+ * Creates a single event card
+ * 
+ * @param event - Single event data
+ */
 const meetupTemplate = (event: any) => {
     let name = event.name,
         link = event.link,
         local_date = event.local_date,
-        local_time = event.local_time
+        local_time = event.local_time;
 
     return `
         <a href="${link}" target="_blank" rel="noopener noreferrer" class="event-card">
             <p class="date">${local_date} // ${local_time}</p>
             <h4>${name}</h4>
         </a>
-    `
+    `;
 }
 
+/**
+ * Populates the meetup events data based on fetched data
+ * 
+ * @param data - meetup response data
+ */
 const populateMeetup = (data: Array<object>) => {
-    let meetupDOM = []
+    let meetupDOM = [];
     if (data.length === 0) {
+        // No results DOM
         meetupDOM.push(`
             <div class="no-results">
                 <h4>No Meetups Found</h4>
                 <a href="https://www.meetup.com/" target="_blank" rel="noopener noreferrer">Visit Meetup</a>
             </div>
-        `)
+        `);
     }
     else {
-        meetupDOM = data.map(item => meetupTemplate(item))
+        meetupDOM = data.map(item => meetupTemplate(item));
     }
 
     return createElement(`
@@ -341,19 +453,30 @@ const populateMeetup = (data: Array<object>) => {
                 ${meetupDOM.join('')}
             </div>
         </div>
-    `)
+    `);
 }
 
+/**
+ * Formats the weekend dates in ISO Format for Meetup - 2018-09-09T00:00:00
+ * @param time - epoch time
+ * @param timezone - users timezone
+ */
 const getDateISOFormat = (time: number, timezone: string) => {
     let date = new Date(time * 1000),
         day = date.toDateString().match(/(\d{1,2}\s)/gm),
-        month = (date.getMonth() + 1) < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1
+        month = (date.getMonth() + 1) < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1;
 
     if (day && month) {
-        return `${date.getFullYear()}-${month}-${day[0].trim()}T${date.toLocaleTimeString('en-GB', { timeZone: timezone })}`
+        return `${date.getFullYear()}-${month}-${day[0].trim()}T${date.toLocaleTimeString('en-GB', { timeZone: timezone })}`;
     }
 }
 
+/**
+ * Creates box items for the 48hr forecasts
+ * 
+ * @param data - DarkSky forecast data
+ * @param timezone - current users timezone
+ */
 const displayHourlyForecast = (data: any, timezone: string) => {
     let hourly = data.map((item: any) => {
         return `
@@ -367,239 +490,305 @@ const displayHourlyForecast = (data: any, timezone: string) => {
                 </div>
             </div>
         `
-    })
-    let hourly_dom = createElement(`<div class="hourly-wrapper">${hourly.join('')}</div>`)
+    });
+    let hourly_dom = createElement(`<div class="hourly-wrapper">${hourly.join('')}</div>`);
 
     if (hourly_wrapper && hourly_dom) {
+        // append the new elements to the wrapper
         hourly_wrapper.appendChild( hourly_dom );
     }
 }
 
+/**
+ * Triggers a page change transition
+ * 
+ * @param page - page element
+ * @param classList - classes to remove/add from the body
+ * @param callback - optional callback function to run on page change
+ */
 const changePage = (page: Element|null, classList: ClassList, callback: Function|null = null) => {
     if (page) {
         page.addEventListener('click', (e) => {
-            e.preventDefault()
+            e.preventDefault();
             if (body) {
-                window.scrollTo(0, 0)
+                window.scrollTo(0, 0);
                 if (typeof classList.add !== 'undefined') {
-                    body.classList.add(...classList.add.split(' '))
+                    body.classList.add(...classList.add.split(' '));
                 }
                 if (typeof classList.remove !== 'undefined') {
-                    body.classList.remove(...classList.remove.split(' '))
+                    body.classList.remove(...classList.remove.split(' '));
                 }
                 if (callback) {
-                    callback()
+                    callback();
                 }
             }
         })
     }
 }
 
+/**
+ * Updates the users location data when changing their location using search
+ * 
+ * @param location - lat and lng data object
+ * @param city - new city string
+ */
 const updateApplicationData = (location: any, city: string) => {
-    user_location = location
-    session_storage.setItem(KEY_LOCATION, JSON.stringify(user_location))
+    user_location = location;
+    session_storage.setItem(KEY_LOCATION, JSON.stringify(user_location));
 
-    updateUserCity(city)
-    session_storage.setItem(KEY_CITY, city)
+    updateUserCity(city);
+    session_storage.setItem(KEY_CITY, city);
 
-    window.location.href = "/"
+    // Triggers a reload to display the new data
+    window.location.href = "/";
 }
 
+/**
+ * Displays all the search results and binds the click event to
+ * the newly created DOM elements.
+ * @param data Mapbox returned data
+ */
 const displaySearchResults = (data: Array<any>) => {
     let list = data.map((item: any) => (
         `
             <li data-lng="${item.center[0]}" data-lat="${item.center[1]}" data-city="${item.text}">${item.place_name}</li>
         `
-    ))
+    ));
 
     if (list.length === 0) {
-        list.push(`<p class="label">No Results Found</p>`)
+        // Empty State
+        list.push(`<p class="label">No Results Found</p>`);
     }
 
-    let resultsDOM = createElement(`<ul class="search-results">${list.join('')}</ul>`)
+    let resultsDOM = createElement(`<ul class="search-results">${list.join('')}</ul>`);
     if (search_results && resultsDOM) {
-        search_results.innerHTML = ''
-        search_results.appendChild(resultsDOM)
+        // clear the search results before appending new results.
+        search_results.innerHTML = '';
+        search_results.appendChild(resultsDOM);
 
-        let search_items = search_results.querySelectorAll('li')
+        let search_items = search_results.querySelectorAll('li');
         if (search_items) {
             for (let i = 0; i < search_items.length; i++) {
+                // Bind the click event
                 search_items[i].addEventListener('click', (e) => {
-                    e.preventDefault()
+                    e.preventDefault();
                     let location_data = {
                         "coords": {
                             "latitude": search_items[i].getAttribute('data-lat'),
                             "longitude": search_items[i].getAttribute('data-lng')
                         }
-                    }
+                    };
 
-                    updateApplicationData(location_data, search_items[i].getAttribute('data-city') || '')
-                })
+                    // Update the application data and reload the page.
+                    updateApplicationData(location_data, search_items[i].getAttribute('data-city') || '');
+                });
             }
         }
     }
 }
 
+// Application setup before displaying any data to the user
 const setupApp = () => new Promise(resolve => {
 
+    // Check if there is a username
     updateApplicationUsername();
+    // Gets the users city
     getUserLocationCity();
 
-    user_location = session_storage.getItem(KEY_LOCATION)
+    // Gets the location from session storage
+    user_location = session_storage.getItem(KEY_LOCATION);
 
+    // Gets the users location
     getUserLocation(user_location)
         .then((position: any) => {
+            // Sets default location to UC campus
             if (typeof position.coords === 'undefined') {
                 user_location = {
                     "coords": {
                         "latitude": -35.2384096,
                         "longitude": 149.083832
                     }
-                }
+                };
             }
             else {
+                // Sets the location to the returned data
                 user_location = {
                     "coords": {
                         "latitude": position.coords.latitude,
                         "longitude": position.coords.longitude
                     }
-                }
-                session_storage.setItem(KEY_LOCATION, JSON.stringify(user_location))
+                };
             }
+            // Sets the session storage value
+            session_storage.setItem(KEY_LOCATION, JSON.stringify(user_location));
         })
         .catch(e => console.error('Location', e))
         .then(() => {
+            // If there is no city
             if (user_city === null) {
-                let url = `${MAPBOX}/geocoding/v5/mapbox.places/${user_location.coords.longitude}%2C${user_location.coords.latitude}.json?access_token=${MAPBOX_KEY}&types=place`
+                // Fetch the city from mapbox based on the users location
+                let url = `${MAPBOX}/geocoding/v5/mapbox.places/${user_location.coords.longitude}%2C${user_location.coords.latitude}.json?access_token=${MAPBOX_KEY}&types=place`;
                 return fetch(url)
                     .then(res => res.json())
                     .then(data => {
-                        console.log('map', data);
-                        updateUserCity(data.features[0].text)
-                        session_storage.setItem(KEY_CITY, data.features[0].text)
+                        // Updates the city text and sets session storage
+                        updateUserCity(data.features[0].text);
+                        session_storage.setItem(KEY_CITY, data.features[0].text);
                     })
                     .catch(e => console.error(e))
             }
             else {
-                updateUserCity(user_city)
+                // Update the city text
+                updateUserCity(user_city);
             }
         })
         .then(() => {
+            // Gets the weather data from dark sky based on the users location
             let url = DARK_SKY + `${user_location.coords.latitude},${user_location.coords.longitude}?units=ca&exclude=[minutely,alerts,flags]`;
             return AJAX(url)
                 .then((data) => {
                     current_weather = data;
-                    console.log('Dark Sky Data', current_weather);
-                    
+                    // Updates the Header to reflect the weather
                     updateHeader();
+                    // Updates the time - needs to happen here to have access to the users timezone
                     updateDatetime();
-                    displayHourlyForecast(current_weather.hourly.data, current_weather.timezone)
+                    // Renders the hourly forecast
+                    displayHourlyForecast(current_weather.hourly.data, current_weather.timezone);
                 })
                 .catch(e => console.error('Dark Sky Fetch', e))
         })
         .catch(e => console.error('Dark Sky', e))
         .then(() => {
-            resolve()
+            // continues once everything is completed
+            resolve();
         })
 })
 
 setupApp()
     .then(() => {
+        // Adds the loaded class to the body to hide the loading animation
         if (body) {
-            body.classList.add('loaded')
+            body.classList.add('loaded');
         }
 
+        // Adds a event listener to the save button
         if (personal_name_save !== null) {
             personal_name_save.addEventListener('click', (e) => {
-                saveApplicationUsername(e)
+                saveApplicationUsername(e);
             });
         }
 
+        // Gets the weekend weather
         let weekend_weather: any = getUpcomingWeekendWeather(current_weather.daily.data),
             back_arrow = document.querySelector('.appbar .details .feather.back-arrow'),
-            weekend_card = document.querySelector('#app .app-options .option .card.weekend-planner')
+            weekend_card = document.querySelector('#app .app-options .option .card.weekend-planner');
         
+        // Populates the weekend page with the weekend weather data
         populateWeekendPage(weekend_weather, current_weather.timezone);
 
+        // Change page options for the weekend card
         changePage(weekend_card, {
             add: 'weekend-open'
-        })
+        });
         
+        // Change page options for the back arrow
         changePage(back_arrow, {
             remove: 'weekend-open location-selection-open'
         }, () => {
+            // Clears the search input field
             if (location_search) {
-                location_search.value = ''
+                location_search.value = '';
                 if (search_results) {
-                    search_results.innerHTML = ''
+                    search_results.innerHTML = '';
                 }
             }
-        })
+        });
 
+        // Change page options for the city page
         changePage(cityDOM, {
             add: 'location-selection-open',
             remove: 'weekend-open'
-        })
+        });
 
         if (location_search) {
-            let autocomplete_timer: any = null
+            // sets the autocomplete timer to null
+            let autocomplete_timer: any = null;
+            // if the user presses a key, reset the timer.
             location_search.addEventListener('keydown', (e: any) => {
-                clearTimeout(autocomplete_timer)
+                clearTimeout(autocomplete_timer);
             })
 
+            // adds input event listener to search field
             location_search.addEventListener('input', (e: any) => {
+                // if the input value is empty, remove all search results
                 if (e.target.value === '') {
                     if (search_results) {
-                        search_results.innerHTML = ''
+                        search_results.innerHTML = '';
                     }
                 }
 
+                // If the input value is nothing or less than 3 characters, don't search for city
                 if (e.target.value === '' || e.target.value.length < 3) return false
 
+                // set timeout for buffer time.
                 autocomplete_timer = setTimeout(() => {
 
+                    // Adds a loading animation
                     if (location_selection) {
                         location_selection.classList.add('loading');
                     }
                     
-                    let url = `${MAPBOX}/geocoding/v5/mapbox.places/${encodeURIComponent(e.target.value)}.json?access_token=${MAPBOX_KEY}&place_type=[place,country,region]`
+                    // Fetches the search data from mapbox
+                    let url = `${MAPBOX}/geocoding/v5/mapbox.places/${encodeURIComponent(e.target.value)}.json?access_token=${MAPBOX_KEY}&place_type=[place,country,region]`;
                     fetch(url)
                         .then(res => res.json())
                         .then(data => {
+                            // remove the loading animation
                             if (location_selection) {
                                 location_selection.classList.remove('loading');
                             }
-                            displaySearchResults(data.features)
+                            // display all the search results.
+                            displaySearchResults(data.features);
                         })
                         .catch(e => console.error('Search error', e))
 
-                }, autocomplete_buffer)
+                }, autocomplete_buffer);
             })
         }
 
-        let end_date_range = getDateISOFormat(weekend_weather[1].time, current_weather.timezone)
-        let start_date_range = getDateISOFormat(weekend_weather[0].time, current_weather.timezone)
+        // Gets the correct time format for the meetup request.
+        let end_date_range = getDateISOFormat(weekend_weather[1].time, current_weather.timezone);
+        let start_date_range = getDateISOFormat(weekend_weather[0].time, current_weather.timezone);
 
-        let meetupURL = `${MEETUP}&lon=${user_location.coords.longitude}&lat=${user_location.coords.latitude}&radius=10&page=50&topic_category=15892&end_date_range=${end_date_range}&start_date_range=${start_date_range}`
+        // construct the meetup request URL
+        // replaces ending 00:00:00 to 23:59:59 to ensure that Sunday's events are included
+        let meetupURL = `${MEETUP}&lon=${user_location.coords.longitude}&lat=${user_location.coords.latitude}&radius=10&page=50&topic_category=15892&end_date_range=${end_date_range ? end_date_range.replace(/(\d{2}:\d{2}:\d{2})/gm, '23:59:59') : end_date_range}&start_date_range=${start_date_range}`;
 
+        console.log(meetupURL);
+
+        // call meetup api
         AJAX(meetupURL)
             .then((data: any) => {
+                // if there are errors then exit out
                 if (typeof data.errors !== 'undefined') return false
                 
                 if (start_date_range && end_date_range) {
                     let start = start_date_range.replace(/(T\d{2}:\d{2}:\d{2})/gm, ''),
-                        end = end_date_range.replace(/(T\d{2}:\d{2}:\d{2})/gm, '')
-
-                    let events = data.data.events.filter((item: any) => {
-                        return item.local_date === start || item.local_date === end
-                    })
-
-                    let meetupDOM = populateMeetup(events)
+                        end = end_date_range.replace(/(T\d{2}:\d{2}:\d{2})/gm, '');
                 
+                    // ensure only weekend events are being displayed
+                    let events = data.data.events.filter((item: any) => {
+                        return item.local_date === start || item.local_date === end;
+                    });
+
+                    // Populate the meetup container
+                    let meetupDOM = populateMeetup(events);
+                
+                    // Append the meetup content to the weekend page
                     if (weekend_page) {
-                        let target = weekend_page.querySelector('.forecast-wrapper')
+                        let target = weekend_page.querySelector('.forecast-wrapper');
                         if (target && meetupDOM) {
-                            target.appendChild(meetupDOM)
+                            target.appendChild(meetupDOM);
                         }
                     }
 
