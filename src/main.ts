@@ -764,8 +764,6 @@ setupApp()
         // replaces ending 00:00:00 to 23:59:59 to ensure that Sunday's events are included
         let meetupURL = `${MEETUP}&lon=${user_location.coords.longitude}&lat=${user_location.coords.latitude}&radius=10&page=50&topic_category=15892&end_date_range=${end_date_range ? end_date_range.replace(/(\d{2}:\d{2}:\d{2})/gm, '23:59:59') : end_date_range}&start_date_range=${start_date_range}`;
 
-        console.log(meetupURL);
-
         // call meetup api
         AJAX(meetupURL)
             .then((data: any) => {

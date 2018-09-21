@@ -21,7 +21,7 @@ gulp.task("ts", function() {
 gulp.task("sass", function() {
     return gulp.src('./src/**/*.scss')
         .pipe(sass({
-            outputStyle: 'compact'
+            outputStyle: 'compressed'
         }).on('error', sass.logError))
         .pipe(gulp.dest('./public/css'));
 })
